@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LitteR</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = { theme: { extend: { fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] } } } };
+  </script>
+
+  <style>
+    :root { --accent: #6366f1; --accent-2: #8b5cf6; --accent-3: #06b6d4; }
+    body {
+      background:
+        radial-gradient(circle at 10% 0%, rgba(99, 102, 241, 0.18), transparent 45%),
+        radial-gradient(circle at 90% 100%, rgba(6, 182, 212, 0.14), transparent 45%),
+        radial-gradient(circle at 50% 50%, #0b1020, #020617 80%);
+      min-height: 100vh; color: #f8fafc;
+    }
+    .glass-card {
+      background: linear-gradient(145deg, rgba(30, 41, 59, 0.72), rgba(15, 23, 42, 0.6));
+      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    }
+    .glass-input {
+      background: rgba(10, 15, 30, 0.7); border: 1px solid rgba(255, 255, 255, 0.12);
+      color: white; transition: all 0.2s;
+    }
+    .glass-input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 9999px; }
+    .color-palette-btn { width: 28px; height: 28px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; transition: all 0.2s; }
+    .color-palette-btn.active { border-color: #fff; transform: scale(1.1); box-shadow: 0 0 10px rgba(255,255,255,0.5); }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); opacity: 0.6; cursor: pointer; }
+    .comment-reply { margin-left: 20px; border-left: 2px solid rgba(255,255,255,0.1); padding-left: 12px; margin-top: 8px; }
+    .hidden-delete-btn { opacity: 0; transition: opacity 0.25s ease; }
+    .task-card-wrapper:hover .hidden-delete-btn { opacity: 0.55; }
+    .hidden-delete-btn:hover { opacity: 1 !important; }
+    #adminOrgFilterWrapper { display: none; }
+    #adminOrgFilterWrapper.show { display: flex; }
+    #adminOrgFilter option { background: #1e293b; color: #f8fafc; }
+    .transfer-user-item { transition: all 0.15s ease; }
+    .transfer-user-item:hover { background: rgba(255,255,255,0.06); }
+    .transfer-user-item.selected { background: rgba(59, 130, 246, 0.18); border-color: rgba(59, 130, 246, 0.5) !important; }
+    #transferOrgSelect option, #loginForgotOrgSelect option { background: #1e293b; color: #f8fafc; }
+    .litter-logo { background: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4); background-size: 200% 200%; animation: gradientShift 4s ease infinite; }
+    @keyframes gradientShift { 0%, 100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+    .call-btn { transition: all 0.2s ease; }
+    .call-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(34, 197, 94, 0.5); }
+    .call-btn:active { transform: scale(0.98); }
+    .history-timeline { position: relative; padding-left: 24px; }
+    .history-timeline::before { content: ''; position: absolute; left: 6px; top: 4px; bottom: 4px; width: 2px; background: linear-gradient(180deg, #6366f1, #06b6d4, transparent); }
+    .history-item { position: relative; padding: 6px 0; }
+    .history-item::before { content: ''; position: absolute; left: -22px; top: 12px; width: 10px; height: 10px; border-radius: 50%; background: #06b6d4; border: 2px solid #0f172a; box-shadow: 0 0 8px rgba(6, 182, 212, 0.6); }
+    .history-item.old::before { background: #f59e0b; box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); }
+    .history-item.current::before { background: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.6); }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in-up { animation: fadeInUp 0.3s ease; }
+    .login-card { background: linear-gradient(145deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.9)); border: 1px solid rgba(99, 102, 241, 0.25); box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 60px rgba(99, 102, 241, 0.15); }
+    #forgotPasswordModal { backdrop-filter: blur(20px); }
+    .morg-org-row { transition: background 0.15s ease; }
+    .morg-org-row:hover { background: rgba(255,255,255,0.04); }
+    .morg-user-row { transition: background 0.12s ease; }
+    .morg-user-row:hover { background: rgba(255,255,255,0.06); }
+    .morg-user-row.active { background: rgba(217,70,239,0.18); border-color: rgba(217,70,239,0.5) !important; }
+    .morg-badge { display:inline-block; font-size:9px; padding:1px 5px; border-radius:9999px; margin-right:2px; margin-bottom:1px; }
+  </style>
+</head>
+<body class="font-sans antialiased flex flex-col min-h-screen">
+
+  <!-- 1. LOGIN -->
+  <div id="loginOverlay" class="fixed inset-0 bg-slate-950/90 backdrop-blur-lg z-[100] flex items-center justify-center p-4">
+    <div class="login-card w-full max-w-md rounded-3xl p-7">
+      <div class="text-center mb-6">
+        <div class="w-16 h-16 rounded-2xl litter-logo flex items-center justify-center text-3xl mx-auto mb-3 shadow-lg shadow-indigo-500/40">
+          <i class="fa-solid fa-address-book text-white"></i>
+        </div>
+        <h1 class="text-2xl font-extrabold text-white tracking-tight">LitteR</h1>
+        <p class="text-xs text-indigo-300 mt-1">Jamoaviy boshqaruv tizimi</p>
+      </div>
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Login</label>
+          <input type="text" id="loginUsername" required placeholder="Loginingizni kiriting" class="w-full glass-input rounded-xl px-3 py-2.5 text-xs">
+        </div>
+        <div>
+          <label class="block text-xs text-slate-300 mb-1">Parol</label>
+          <input type="password" id="loginPassword" required placeholder="••••••••" class="w-full glass-input rounded-xl px-3 py-2.5 text-xs">
+        </div>
+        <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white py-2.5 rounded-xl text-xs font-bold shadow-lg transition">Kirish</button>
+      </form>
+      <div class="text-center mt-4">
+        <button onclick="openForgotPasswordModal()" class="text-[11px] text-indigo-300 hover:text-indigo-200 hover:underline">
+          <i class="fa-solid fa-circle-question mr-1"></i> Parolni unutdingizmi?
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1.5 FORGOT -->
+  <div id="forgotPasswordModal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-xl hidden items-center justify-center z-[110] p-4">
+    <div class="login-card w-full max-w-md rounded-3xl p-7">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-phone-volume text-emerald-400 mr-2"></i>Qo'ng'iroq qiling</h3>
+        <button onclick="toggleModal('forgotPasswordModal', false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+        Parolni unutgan bo'lsangiz, quyidagi <b class="text-emerald-400">Call Center</b> raqamlaridan biriga qo'ng'iroq qiling.
+      </p>
+      <div class="space-y-2 mb-4">
+        <label class="text-[10px] text-slate-400 block">Tashkilotni tanlang:</label>
+        <select id="loginForgotOrgSelect" onchange="renderForgotNumbers()" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          <option value="all">Barcha Call Center raqamlari</option>
+        </select>
+      </div>
+      <div id="forgotNumbersList" class="space-y-2 max-h-[320px] overflow-y-auto"></div>
+      <div class="mt-4 pt-4 border-t border-white/10 flex justify-end">
+        <button onclick="toggleModal('forgotPasswordModal', false)" class="bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-xl text-xs">Yopish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. HEADER -->
+  <header class="glass-card sticky top-0 z-30 border-b border-white/10 px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl litter-logo flex items-center justify-center shadow-lg shadow-indigo-500/30">
+          <i class="fa-solid fa-address-book text-lg text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-lg text-white tracking-tight">LitteR</h1>
+          <p class="text-[11px] text-indigo-300" id="userRoleBadge">Tizimga kirilmagan</p>
+        </div>
+      </div>
+      <div class="flex-1 max-w-md mx-4 hidden md:block" id="headerSearchBox">
+        <div class="relative">
+          <input type="text" id="globalUserSearch" placeholder="Xodimlarni qidirish..." class="w-full glass-input rounded-xl pl-9 pr-3 py-2 text-xs">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
+        </div>
+        <div id="searchResultsDropdown" class="absolute w-full max-w-md mt-1 bg-slate-800 rounded-xl shadow-xl border border-white/10 hidden max-h-60 overflow-y-auto z-50"></div>
+      </div>
+      <div id="adminOrgFilterWrapper" class="items-center gap-2 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-amber-500/30">
+        <i class="fa-solid fa-filter text-amber-400 text-xs"></i>
+        <select id="adminOrgFilter" class="bg-transparent text-xs text-slate-200 outline-none cursor-pointer max-w-[170px]">
+          <option value="all">Barcha tashkilotlar</option>
+        </select>
+      </div>
+      <div class="flex items-center gap-2" id="dynamicNavMenu"></div>
+      <div class="flex items-center gap-2 bg-slate-900/80 px-3 py-1.5 rounded-xl border border-white/5 cursor-pointer" onclick="openProfileModal()">
+        <img id="headerAvatar" src="" class="w-6 h-6 rounded-full object-cover hidden">
+        <i class="fa-solid fa-circle-user text-indigo-400 text-base" id="headerAvatarIcon"></i>
+        <span id="currentUserNameDisplay" class="text-xs font-bold text-slate-200">Mehmon</span>
+        <button id="logoutBtn" class="ml-2 text-slate-400 hover:text-rose-400 text-xs" title="Chiqish"><i class="fa-solid fa-right-from-bracket"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 3. BOARD -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-8 space-y-6">
+    <div id="columnsContainer" class="flex gap-5 overflow-x-auto pb-4 items-start min-h-[70vh]"></div>
+  </main>
+
+  <!-- 4. PROFILE -->
+  <div id="profileModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="glass-card w-full max-w-md rounded-2xl p-6 border border-white/10 shadow-2xl">
+      <h3 class="text-base font-bold text-white mb-4">Mening Profilim</h3>
+      <div class="flex items-center gap-4 mb-4">
+        <div class="relative">
+          <img id="profAvatarImg" src="" class="w-16 h-16 rounded-full object-cover border-2 border-indigo-500 hidden">
+          <div id="profAvatarPlaceholder" class="w-16 h-16 rounded-full bg-indigo-600/30 text-indigo-300 flex items-center justify-center text-2xl font-bold border-2 border-indigo-500">U</div>
+        </div>
+        <div>
+          <input type="file" id="avatarUploadInput" accept="image/*" class="hidden" onchange="handleAvatarUpload(this)">
+          <button onclick="document.getElementById('avatarUploadInput').click()" class="bg-slate-800 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-lg border border-white/10">Rasm yuklash</button>
+          <p class="text-[10px] text-amber-400 mt-1" id="avatarStatusText"></p>
+        </div>
+      </div>
+      <div class="space-y-3">
+        <div><label class="text-xs text-slate-400">To'liq ism</label><input type="text" id="profFullName" class="w-full glass-input rounded-xl px-3 py-2 text-xs" readonly></div>
+        <div><label class="text-xs text-slate-400">Tashkilot(lar)</label><input type="text" id="profOrgName" class="w-full glass-input rounded-xl px-3 py-2 text-xs" readonly></div>
+        <div>
+          <label class="text-xs text-slate-400">Parolni ko'rish / O'zgartirish</label>
+          <div class="flex gap-2">
+            <input type="password" id="profPassword" class="w-full glass-input rounded-xl px-3 py-2 text-xs font-mono" readonly>
+            <button onclick="togglePasswordView()" class="bg-slate-800 px-3 rounded-xl"><i class="fa-solid fa-eye" id="eyeIcon"></i></button>
+          </div>
+        </div>
+        <div id="changePasswordSection" class="hidden pt-2 border-t border-white/10">
+          <label class="text-[10px] text-rose-400">Yangi parol kiritish</label>
+          <div class="flex gap-2 mt-1">
+            <input type="text" id="newPasswordInput" placeholder="Yangi parol" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+            <button onclick="saveNewPassword()" class="bg-emerald-600 px-3 py-2 rounded-xl text-xs font-bold">Saqlash</button>
+          </div>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-end">
+        <button onclick="toggleModal('profileModal', false)" class="bg-slate-800 px-4 py-2 rounded-xl text-xs">Yopish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. ORGS -->
+  <div id="orgModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="glass-card w-full max-w-2xl rounded-2xl p-6 border border-white/10 shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+        <h3 class="text-base font-bold text-white"><i class="fa-solid fa-building text-amber-400 mr-2"></i>Tashkilotlar</h3>
+        <button onclick="toggleModal('orgModal', false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-hidden">
+        <form id="orgForm" class="space-y-3 bg-slate-900/50 p-4 rounded-xl border border-white/5 overflow-y-auto">
+          <input type="hidden" id="orgId">
+          <input type="text" id="orgName" required placeholder="To'liq nomi" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          <input type="text" id="orgShortName" required placeholder="Qisqa nomi" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          <input type="text" id="orgAddress" placeholder="Manzil" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          <div class="pt-2 border-t border-white/10 space-y-2">
+            <label class="text-[10px] font-bold text-emerald-400 uppercase"><i class="fa-solid fa-phone"></i> Call Center raqamlari</label>
+            <div class="space-y-1.5" id="orgPhonesContainer"></div>
+            <button type="button" onclick="addOrgPhoneInput()" class="text-[10px] text-emerald-400 hover:text-emerald-300"><i class="fa-solid fa-plus mr-1"></i>Yana raqam qo'shish</button>
+          </div>
+          <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 py-2 rounded-xl text-xs font-semibold text-white">Saqlash</button>
+        </form>
+        <div id="orgsList" class="space-y-2 overflow-y-auto pr-1"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. USERS -->
+  <div id="userManagementModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="glass-card w-full max-w-4xl rounded-2xl p-6 border border-white/10 shadow-2xl relative max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b border-white/10">
+        <h3 class="text-base font-bold text-white"><i class="fa-solid fa-user-gear text-indigo-400 mr-2"></i>Foydalanuvchilar</h3>
+        <button onclick="toggleModal('userManagementModal', false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-6 mt-4 flex-1 overflow-y-auto">
+        <form id="userForm" class="md:col-span-2 space-y-2 bg-slate-900/50 p-4 rounded-xl border border-white/5 overflow-y-auto">
+          <input type="hidden" id="userId">
+          <select id="userRoleType" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+            <option value="user">Foydalanuvchi / O'quvchi</option>
+            <option value="teacher">Ustoz</option>
+            <option value="admin">Administrator</option>
+          </select>
+          <select id="userOrgSelect" class="w-full glass-input rounded-xl px-3 py-2 text-xs"></select>
+          <input type="text" id="userFullName" required placeholder="Ism Familiya" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          <input type="text" id="userRole" required placeholder="Lavozimi" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          <input type="text" id="userLogin" required placeholder="Login" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          <input type="text" id="userPassword" required placeholder="Parol" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          <div class="pt-2 border-t border-white/5 space-y-1">
+            <span class="text-[10px] font-bold text-slate-400 uppercase">Ruxsatlar:</span>
+            <label class="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" id="permTaskAdd" class="w-3.5 h-3.5"> Vazifa qo'shish</label>
+            <label class="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" id="permTaskEdit" class="w-3.5 h-3.5"> Boshqa vazifalarni tahrirlash</label>
+            <label class="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" id="permStatusChange" class="w-3.5 h-3.5"> Holat/Ustunni o'zgartirish</label>
+            <label class="flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" id="permComment" class="w-3.5 h-3.5"> Izoh qoldirish</label>
+          </div>
+          <button type="submit" class="w-full bg-indigo-600 py-2 rounded-xl text-xs font-semibold text-white">Saqlash</button>
+          <p class="text-[9px] text-slate-500 text-center"><i class="fa-solid fa-circle-info"></i> Ko'p tashkilotga biriktirish uchun "🏢 Ko'p Tashkilot" bo'limiga o'ting</p>
+        </form>
+        <div class="md:col-span-3 space-y-2 overflow-y-auto max-h-[420px]" id="usersListContainer"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6.5 MULTI-ORG -->
+  <div id="multiOrgModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="glass-card w-full max-w-3xl rounded-2xl p-6 border border-fuchsia-500/30 shadow-2xl flex flex-col max-h-[92vh]">
+      <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+        <h3 class="text-base font-bold text-white">
+          <i class="fa-solid fa-diagram-project text-fuchsia-400 mr-2"></i>
+          Ko'p Tashkilotli Xodimlar
+        </h3>
+        <button onclick="toggleModal('multiOrgModal', false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl p-3 mb-4">
+        <p class="text-[11px] text-fuchsia-200">
+          <i class="fa-solid fa-circle-info mr-1"></i>
+          Bu bo'lim orqali bitta xodimni <b>bir vaqtda 2-3 ta tashkilotga</b> biriktirishingiz mumkin. Xodim barcha tashkilotlarining vazifalarini ko'radi.
+        </p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-hidden">
+        <div class="flex flex-col overflow-hidden">
+          <div class="relative mb-2">
+            <input type="text" id="multiOrgSearch" placeholder="Xodimni qidirish..." class="w-full glass-input rounded-xl pl-9 pr-3 py-2 text-xs">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+          </div>
+          <div id="multiOrgUserList" class="space-y-1 overflow-y-auto flex-1 pr-1"></div>
+        </div>
+        <div id="multiOrgAssignPanel" class="bg-slate-900/50 rounded-xl p-4 border border-white/5 overflow-y-auto">
+          <div class="text-center py-10">
+            <i class="fa-solid fa-hand-pointer text-slate-600 text-3xl mb-2"></i>
+            <p class="text-xs text-slate-400">Chapdan xodimni tanlang</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6.6 TRANSFER -->
+  <div id="transferUserModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="glass-card w-full max-w-2xl rounded-2xl p-6 border border-white/10 shadow-2xl flex flex-col max-h-[92vh]">
+      <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+        <h3 class="text-base font-bold text-white"><i class="fa-solid fa-right-left text-cyan-400 mr-2"></i>Xodimni o'tkazish</h3>
+        <button onclick="closeTransferModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-2 mb-3">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">1. Xodimni qidirish</label>
+        <div class="relative">
+          <input type="text" id="transferSearchInput" placeholder="Login yoki ism familiyani yozing..." class="w-full glass-input rounded-xl pl-9 pr-3 py-2 text-xs">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+        </div>
+      </div>
+      <div id="transferSearchResults" class="max-h-[180px] overflow-y-auto space-y-1 mb-3 hidden"></div>
+      <div id="transferSelectedInfo" class="hidden bg-slate-900/60 p-4 rounded-xl border border-indigo-500/30 mb-3">
+        <div class="flex items-start gap-3">
+          <div class="flex-shrink-0">
+            <img id="transferAvatarImg" src="" class="w-14 h-14 rounded-full object-cover border-2 border-indigo-500 hidden">
+            <div id="transferAvatarPlaceholder" class="w-14 h-14 rounded-full bg-indigo-600/30 text-indigo-300 flex items-center justify-center text-xl font-bold border-2 border-indigo-500">?</div>
+          </div>
+          <div class="flex-1 space-y-1">
+            <p class="text-sm font-bold text-white" id="transferFullName">—</p>
+            <p class="text-[11px] text-indigo-300" id="transferRole">—</p>
+            <p class="text-[11px] text-slate-400"><i class="fa-solid fa-user-tag"></i> Login: <b id="transferLogin">—</b></p>
+            <p class="text-[11px] text-slate-400"><i class="fa-solid fa-building"></i> Hozirgi: <b id="transferCurrentOrg" class="text-amber-400">—</b></p>
+            <p class="text-[11px] text-slate-400"><i class="fa-solid fa-list-check"></i> Vazifalar: <b id="transferTaskCount" class="text-emerald-400">0</b> ta</p>
+          </div>
+        </div>
+        <div class="mt-3 pt-3 border-t border-white/10">
+          <p class="text-[10px] font-bold text-cyan-400 mb-2"><i class="fa-solid fa-clock-rotate-left mr-1"></i> To'liq tarix</p>
+          <div id="transferHistoryTimeline" class="history-timeline text-[10px] max-h-[220px] overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+      <div id="transferOrgSection" class="hidden space-y-2 mb-3">
+        <label class="text-[10px] font-bold text-slate-400 uppercase">2. Yangi tashkilotni tanlang</label>
+        <select id="transferOrgSelect" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+          <option value="">Tashkilot tanlang</option>
+        </select>
+      </div>
+      <div class="pt-3 border-t border-white/10 flex justify-end gap-2 mt-auto">
+        <button onclick="closeTransferModal()" class="bg-slate-800 px-4 py-2 rounded-xl text-xs">Bekor qilish</button>
+        <button id="transferConfirmBtn" onclick="confirmUserTransfer()" disabled class="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-40 disabled:cursor-not-allowed px-5 py-2 rounded-xl text-xs font-bold text-white"><i class="fa-solid fa-right-left mr-1"></i> O'tkazish</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. COLUMNS -->
+  <div id="columnModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="glass-card w-full max-w-md rounded-2xl p-6 border border-white/10 shadow-2xl">
+      <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+        <h3 class="text-base font-bold text-white"><i class="fa-solid fa-columns text-emerald-400 mr-2"></i>Ustunlar</h3>
+        <button onclick="toggleModal('columnModal', false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="columnForm" class="space-y-3 mb-4 bg-slate-900/50 p-3 rounded-xl">
+        <input type="hidden" id="colId">
+        <input type="text" id="colTitle" required placeholder="Ustun nomi" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+        <div>
+          <label class="text-[10px] text-slate-400 block mb-1">Rang</label>
+          <div class="grid grid-cols-8 gap-1" id="colColorPalette"></div>
+          <input type="hidden" id="colColor" value="blue">
+        </div>
+        <button type="submit" class="w-full bg-emerald-600 py-2 rounded-xl text-xs font-semibold text-white">Saqlash</button>
+      </form>
+      <div class="space-y-2 max-h-[250px] overflow-y-auto" id="columnsListContainer"></div>
+    </div>
+  </div>
+
+  <!-- 8. STATUSES -->
+  <div id="statusModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="glass-card w-full max-w-md rounded-2xl p-6 border border-white/10 shadow-2xl">
+      <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-3">
+        <h3 class="text-base font-bold text-white"><i class="fa-solid fa-tags text-rose-400 mr-2"></i>Maxsus Holatlar</h3>
+        <button onclick="toggleModal('statusModal', false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="statusForm" class="space-y-3 mb-4 bg-slate-900/50 p-3 rounded-xl">
+        <input type="hidden" id="statusId">
+        <input type="text" id="statusTitle" required placeholder="Holat nomi" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+        <div>
+          <label class="text-[10px] text-slate-400 block mb-1">Kim uchun?</label>
+          <select id="statusTargetType" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+            <option value="admin">Admin uchun</option>
+            <option value="user">Foydalanuvchi/O'quvchi uchun</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] text-slate-400 block mb-1">Rang</label>
+          <div class="grid grid-cols-8 gap-1" id="statusColorPalette"></div>
+          <input type="hidden" id="statusColor" value="amber">
+        </div>
+        <button type="submit" class="w-full bg-rose-600 py-2 rounded-xl text-xs font-semibold text-white">Saqlash</button>
+      </form>
+      <div class="space-y-2 max-h-[250px] overflow-y-auto" id="statusesListContainer"></div>
+    </div>
+  </div>
+
+  <!-- 9. TASK MODAL -->
+  <div id="taskModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="glass-card w-full max-w-xl rounded-2xl p-6 border border-white/10 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+        <h3 class="text-base font-bold text-white" id="taskModalTitle">Vazifa</h3>
+        <button onclick="toggleModal('taskModal', false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="taskForm" class="space-y-3">
+        <input type="hidden" id="taskId">
+        <select id="taskOrgId" class="w-full glass-input rounded-xl px-3 py-2 text-xs hidden"></select>
+        <input type="text" id="taskTitle" required placeholder="Sarlavha" class="w-full glass-input rounded-xl px-3 py-2 text-xs">
+        <textarea id="taskDesc" rows="2" placeholder="Tavsif..." class="w-full glass-input rounded-xl px-3 py-2 text-xs"></textarea>
+        <div>
+          <label class="text-[10px] text-slate-400 block mb-1">Rasmlar:</label>
+          <input type="file" id="taskImagesInput" multiple accept="image/*" class="w-full glass-input rounded-xl px-3 py-2 text-xs text-slate-400">
+          <p class="text-[9px] text-amber-400 mt-1" id="taskImageStatus"></p>
+        </div>
+        <div class="bg-slate-900/50 p-3 rounded-xl border border-white/5 space-y-3">
+          <label class="flex items-center gap-2 text-xs font-bold text-indigo-300 cursor-pointer">
+            <input type="checkbox" id="useIndividualSettings" class="w-4 h-4 rounded" onchange="toggleIndividualMode()">
+            Har bir foydalanuvchiga alohida Ustun va Holat
+          </label>
+          <div id="globalSettingsDiv" class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="text-[10px] text-slate-400 block mb-1">Umumiy Ustun</label>
+              <select id="taskGlobalColId" class="w-full glass-input rounded-xl px-3 py-2 text-xs"></select>
+            </div>
+            <div>
+              <label class="text-[10px] text-slate-400 block mb-1">Admin Holati</label>
+              <select id="taskGlobalStatusId" class="w-full glass-input rounded-xl px-3 py-2 text-xs"></select>
+            </div>
+          </div>
+          <div id="individualSettingsDiv" class="hidden space-y-2 max-h-[200px] overflow-y-auto pr-1"></div>
+        </div>
+        <div>
+          <label class="text-[10px] text-slate-400 block mb-1">Mas'ullar:</label>
+          <div id="multiAssigneeContainer" class="max-h-[150px] overflow-y-auto glass-input p-2 rounded-xl space-y-2"></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Muddat</label>
+            <input type="date" id="taskDueDate" class="w-full glass-input rounded-xl px-3 py-2 text-xs text-slate-300">
+          </div>
+          <div>
+            <label class="text-[10px] text-slate-400 block mb-1">Kartochka Rangi</label>
+            <div class="grid grid-cols-8 gap-1" id="taskColorPalette"></div>
+            <input type="hidden" id="taskColor" value="blue">
+          </div>
+        </div>
+        <div class="pt-3 flex justify-end gap-2">
+          <button type="submit" class="bg-blue-600 px-5 py-2 rounded-xl text-xs font-semibold text-white">Saqlash</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 10. TASK DETAIL -->
+  <div id="taskDetailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+    <div class="glass-card w-full max-w-2xl rounded-2xl p-6 border border-white/10 shadow-2xl relative max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
+        <h3 class="text-base font-bold text-white" id="detailTaskTitle">Vazifa tafsilotlari</h3>
+        <button onclick="toggleModal('taskDetailModal', false)" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="flex-1 overflow-y-auto pr-2 space-y-4" id="detailTaskContent"></div>
+      <div class="pt-4 border-t border-white/10 mt-4">
+        <h4 class="text-xs font-bold text-slate-300 mb-2">Izohlar</h4>
+        <div id="commentsList" class="space-y-3 mb-4 max-h-[200px] overflow-y-auto"></div>
+        <div id="commentInputArea" class="space-y-2">
+          <textarea id="newCommentText" rows="2" placeholder="Izoh yozing..." class="w-full glass-input rounded-xl px-3 py-2 text-xs"></textarea>
+          <div class="flex items-center justify-between">
+            <div>
+              <input type="file" id="commentImageInput" accept="image/*" class="hidden" onchange="previewCommentImage(this)">
+              <button type="button" onclick="document.getElementById('commentImageInput').click()" class="text-slate-400 hover:text-white text-xs"><i class="fa-solid fa-image"></i> Rasm</button>
+              <span id="commentImagePreview" class="text-[10px] text-emerald-400 ml-2 hidden">Rasm tanlandi</span>
+            </div>
+            <button onclick="submitComment()" class="bg-indigo-600 px-4 py-1.5 rounded-lg text-xs font-bold text-white">Yuborish</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAeYCXyB6CTf7CUCtP7BzAIHbpIheFPFz8",
+      authDomain: "mening-jurnalim.firebaseapp.com",
+      databaseURL: "https://mening-jurnalim-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "mening-jurnalim",
+      storageBucket: "mening-jurnalim.firebasestorage.app",
+      messagingSenderId: "341059328255",
+      appId: "1:341059328255:web:6f1f4ebfa36a9ec84714ca"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const usersRef = ref(db, 'admin_users');
+    const tasksRef = ref(db, 'admin_tasks');
+    const columnsRef = ref(db, 'admin_columns');
+    const orgsRef = ref(db, 'admin_orgs');
+    const statusesRef = ref(db, 'admin_statuses');
+
+    let globalUsers = {}, globalTasks = {}, globalColumns = {}, globalOrgs = {}, globalStatuses = {};
+    let currentUser = null;
+    let selectedCommentImage = null;
+    let selectedTaskImages = [];
+    let currentViewingTaskId = null;
+    let selectedOrgFilter = 'all';
+    let transferSelectedUserId = null;
+    let multiOrgSelectedUserId = null;
+
+    const ROOT_ADMIN = {
+      login: 'admin', password: '12345', id: 'admin_root',
+      fullName: 'Bosh Administrator', role: 'Tizim Admini', roleType: 'admin', orgId: 'all',
+      permissions: { taskAdd: true, taskEdit: true, statusChange: true, comment: true }
+    };
+
+    const PALETTE_COLORS = [
+      { name: 'red', hex: '#ef4444' }, { name: 'cyan', hex: '#06b6d4' }, { name: 'blue', hex: '#3b82f6' }, { name: 'green', hex: '#22c55e' },
+      { name: 'magenta', hex: '#d946ef' }, { name: 'yellow', hex: '#eab308' }, { name: 'black', hex: '#000000' }, { name: 'white', hex: '#ffffff' }
+    ];
+    const HIDDEN_DELETE_PASSWORD = '500';
+
+    // ═══ MULTI-ORG HELPERS ═══
+    function getUserOrgIds(u) {
+      if (!u) return [];
+      const set = new Set();
+      if (u.orgId) set.add(u.orgId);
+      if (Array.isArray(u.orgIds)) u.orgIds.forEach(id => { if (id) set.add(id); });
+      return Array.from(set);
+    }
+    function userBelongsToOrg(u, orgId) {
+      if (!orgId) return false;
+      return getUserOrgIds(u).includes(orgId);
+    }
+    function userOrgNames(u) {
+      const ids = getUserOrgIds(u);
+      if (ids.length === 0) return '—';
+      return ids.map(id => globalOrgs[id]?.shortName || globalOrgs[id]?.name || '?').join(' + ');
+    }
+    function userOrgBadges(u) {
+      const ids = getUserOrgIds(u);
+      return ids.map(id => {
+        const o = globalOrgs[id]; if (!o) return '';
+        const color = u.orgId === id ? 'background:rgba(245,158,11,0.25);color:#fcd34d;' : 'background:rgba(6,182,212,0.2);color:#67e8f9;';
+        return `<span class="morg-badge" style="${color}">${escapeHtml(o.shortName || o.name)}</span>`;
+      }).join('');
+    }
+
+    function debounce(fn, ms = 120) {
+      let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+    }
+
+    function isRootAdmin() { return !!currentUser && currentUser.id === ROOT_ADMIN.id; }
+
+    window.toggleModal = function(modalId, show) {
+      const m = document.getElementById(modalId);
+      if (show) { m.classList.remove('hidden'); m.classList.add('flex'); }
+      else { m.classList.add('hidden'); m.classList.remove('flex'); }
+    };
+
+    window.deleteTaskWithPassword = function(taskId) {
+      const pass = prompt("🗑 Vazifani o'chirish uchun maxfiy parolni kiriting:");
+      if (pass === null) return;
+      if (pass.trim() !== HIDDEN_DELETE_PASSWORD) { alert("❌ Parol xato!"); return; }
+      if (confirm("⚠️ Vazifa butunlay o'chirilsinmi?")) {
+        remove(ref(db, `admin_tasks/${taskId}`)).then(() => {
+          if (currentViewingTaskId === taskId) { toggleModal('taskDetailModal', false); currentViewingTaskId = null; }
+          alert("✅ O'chirildi!");
+        }).catch(err => alert("❌ " + err.message));
+      }
+    };
+
+    function formatHistoryDate(ts) {
+      if (!ts) return '—';
+      const d = new Date(ts);
+      const pad = n => String(n).padStart(2, '0');
+      const days = ['Yak','Dush','Sesh','Chor','Pay','Jum','Shan'];
+      const months = ['Yanv','Fevr','Mart','Apr','May','Iyun','Iyul','Avg','Sent','Okt','Noy','Dek'];
+      return `${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}, ${days[d.getDay()]} — ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    // --- LOGIN ---
+    document.getElementById('loginForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const loginVal = document.getElementById('loginUsername').value.trim();
+      const passVal = document.getElementById('loginPassword').value.trim();
+
+      if (loginVal.toLowerCase() === ROOT_ADMIN.login && passVal === ROOT_ADMIN.password) {
+        currentUser = { ...ROOT_ADMIN };
+        localStorage.setItem('jamoaviy_session', JSON.stringify({ id: ROOT_ADMIN.id }));
+        initUserSession(); return;
+      }
+      const foundKey = Object.keys(globalUsers).find(k => {
+        const u = globalUsers[k];
+        return u.login.toLowerCase() === loginVal.toLowerCase() && u.password === passVal;
+      });
+      if (foundKey) {
+        currentUser = { id: foundKey, ...globalUsers[foundKey] };
+        localStorage.setItem('jamoaviy_session', JSON.stringify({ id: foundKey }));
+        logLoginHistory(foundKey);
+        initUserSession();
+      } else alert("❌ Login yoki parol xato!");
+    });
+
+    function logLoginHistory(userId) {
+      const u = globalUsers[userId]; if (!u) return;
+      push(ref(db, `admin_users/${userId}/loginHistory`), {
+        timestamp: Date.now(), orgId: u.orgId || null,
+        orgName: globalOrgs[u.orgId]?.name || 'Tashkilotsiz'
+      });
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      localStorage.removeItem('jamoaviy_session'); selectedOrgFilter = 'all'; location.reload();
+    });
+
+    function initUserSession() {
+      document.getElementById('loginOverlay').classList.add('hidden');
+      document.title = 'LitteR — ' + currentUser.fullName;
+      document.getElementById('currentUserNameDisplay').textContent = currentUser.fullName;
+      if (currentUser.avatar) {
+        document.getElementById('headerAvatar').src = currentUser.avatar;
+        document.getElementById('headerAvatar').classList.remove('hidden');
+        document.getElementById('headerAvatarIcon').classList.add('hidden');
+      }
+
+      const nav = document.getElementById('dynamicNavMenu'); nav.innerHTML = '';
+
+      if (currentUser.roleType === 'admin') {
+        if (isRootAdmin()) {
+          document.getElementById('userRoleBadge').textContent = `👑 Bosh Admin`;
+          nav.innerHTML = `
+            <button onclick="toggleModal('orgModal', true)" class="bg-slate-800 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-building text-amber-400"></i> Tashkilotlar</button>
+            <button onclick="toggleModal('userManagementModal', true)" class="bg-slate-800 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-users text-indigo-400"></i> Xodimlar</button>
+            <button onclick="openMultiOrgModal()" class="bg-slate-800 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold border border-fuchsia-500/40" title="Ko'p tashkilotga biriktirish"><i class="fa-solid fa-diagram-project text-fuchsia-400"></i> Ko'p Tashkilot</button>
+            <button onclick="openTransferModal()" class="bg-slate-800 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold border border-cyan-500/40"><i class="fa-solid fa-right-left text-cyan-400"></i> O'tkazish</button>
+            <button onclick="toggleModal('columnModal', true)" class="bg-slate-800 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-columns text-emerald-400"></i> Ustunlar</button>
+            <button onclick="toggleModal('statusModal', true)" class="bg-slate-800 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-tags text-rose-400"></i> Holatlar</button>
+            <button onclick="openTaskModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-plus"></i> Vazifa</button>
+          `;
+        } else {
+          const orgName = globalOrgs[currentUser.orgId]?.shortName || globalOrgs[currentUser.orgId]?.name || 'Tashkilot';
+          document.getElementById('userRoleBadge').textContent = `👤 Admin (${orgName})`;
+          nav.innerHTML = `
+            <button onclick="toggleModal('userManagementModal', true)" class="bg-slate-800 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-users text-indigo-400"></i> Xodimlar</button>
+            <button onclick="toggleModal('columnModal', true)" class="bg-slate-800 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-columns text-emerald-400"></i> Ustunlar</button>
+            <button onclick="toggleModal('statusModal', true)" class="bg-slate-800 text-slate-200 px-3 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-tags text-rose-400"></i> Holatlar</button>
+            <button onclick="openTaskModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-plus"></i> Vazifa</button>
+          `;
+        }
+        document.getElementById('headerSearchBox').classList.remove('hidden');
+      } else {
+        document.getElementById('userRoleBadge').textContent = `👤 ${currentUser.role}`;
+        document.getElementById('headerSearchBox').classList.remove('hidden');
+        if (currentUser.permissions?.taskAdd || currentUser.roleType === 'teacher') {
+          nav.innerHTML += `<button onclick="openTaskModal()" class="bg-blue-600 text-white px-3 py-1.5 rounded-xl text-xs font-semibold"><i class="fa-solid fa-plus"></i> Vazifa</button>`;
+        }
+      }
+
+      // ⭐ PATCH 4: Init filterni chaqirish
+      populateAdminOrgFilter();
+      renderKanbanBoard();
+    }
+
+    // ⭐ PATCH 1: Multi-org userlarga ham filtr
+    function populateAdminOrgFilter() {
+      const sel = document.getElementById('adminOrgFilter');
+      const wrap = document.getElementById('adminOrgFilterWrapper');
+      if (!sel || !wrap || !currentUser) return;
+
+      const isRoot = isRootAdmin();
+      const myOrgs = getUserOrgIds(currentUser);
+      const shouldShow = isRoot || myOrgs.length > 1;
+
+      if (!shouldShow) {
+        wrap.classList.remove('show');
+        if (selectedOrgFilter !== 'all') { selectedOrgFilter = 'all'; renderKanbanBoard(); }
+        return;
+      }
+
+      wrap.classList.add('show');
+      const prev = selectedOrgFilter || 'all';
+      sel.innerHTML = '';
+
+      if (isRoot) {
+        sel.innerHTML = '<option value="all">Barcha tashkilotlar</option>';
+        Object.keys(globalOrgs).forEach(id => {
+          const o = globalOrgs[id];
+          const opt = document.createElement('option');
+          opt.value = id; opt.textContent = o.shortName || o.name;
+          sel.appendChild(opt);
+        });
+      } else {
+        sel.innerHTML = '<option value="all">Mening tashkilotlarim</option>';
+        myOrgs.forEach(id => {
+          const o = globalOrgs[id]; if (!o) return;
+          const opt = document.createElement('option');
+          opt.value = id; opt.textContent = o.shortName || o.name;
+          sel.appendChild(opt);
+        });
+        if (prev !== 'all' && !myOrgs.includes(prev)) {
+          selectedOrgFilter = 'all'; sel.value = 'all'; return;
+        }
+      }
+      sel.value = prev;
+    }
+
+    // ⭐ PATCH 2: Change listener — multi-org userlar ham
+    document.addEventListener('change', (e) => {
+      if (e.target && e.target.id === 'adminOrgFilter') {
+        if (!currentUser) return;
+        const v = e.target.value;
+        if (v !== 'all') {
+          const allowed = isRootAdmin() ? Object.keys(globalOrgs) : getUserOrgIds(currentUser);
+          if (!allowed.includes(v)) return;
+        }
+        selectedOrgFilter = v;
+        renderKanbanBoard();
+      }
+    });
+
+    // ═══ MULTI-ORG MODAL ═══
+    window.openMultiOrgModal = function() {
+      if (!isRootAdmin()) { alert("❌ Faqat bosh administrator!"); return; }
+      multiOrgSelectedUserId = null;
+      document.getElementById('multiOrgSearch').value = '';
+      renderMultiOrgUserList();
+      document.getElementById('multiOrgAssignPanel').innerHTML = `
+        <div class="text-center py-10">
+          <i class="fa-solid fa-hand-pointer text-slate-600 text-3xl mb-2"></i>
+          <p class="text-xs text-slate-400">Chapdan xodimni tanlang</p>
+        </div>`;
+      toggleModal('multiOrgModal', true);
+      setTimeout(() => document.getElementById('multiOrgSearch').focus(), 100);
+    };
+
+    window.renderMultiOrgUserList = function() {
+      if (!isRootAdmin()) return;
+      const q = (document.getElementById('multiOrgSearch')?.value || '').toLowerCase().trim();
+      const list = document.getElementById('multiOrgUserList');
+      list.innerHTML = '';
+      const entries = Object.entries(globalUsers).filter(([id, u]) => {
+        if (!q) return true;
+        return u.fullName.toLowerCase().includes(q) || u.login.toLowerCase().includes(q);
+      }).slice(0, 150);
+
+      if (entries.length === 0) {
+        list.innerHTML = '<p class="text-xs text-slate-400 text-center p-4">Topilmadi</p>';
+        return;
+      }
+
+      entries.forEach(([id, u]) => {
+        const orgCount = getUserOrgIds(u).length;
+        const div = document.createElement('div');
+        div.className = `morg-user-row p-2 rounded-lg cursor-pointer border ${multiOrgSelectedUserId === id ? 'active' : 'border-transparent'}`;
+        div.style.borderColor = 'rgba(255,255,255,0.06)';
+        div.innerHTML = `
+          <div class="flex items-center gap-2">
+            <img src="${u.avatar || ''}" class="w-8 h-8 rounded-full object-cover flex-shrink-0 ${u.avatar ? '' : 'hidden'}">
+            <div class="w-8 h-8 rounded-full bg-fuchsia-600/40 flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${u.avatar ? 'hidden' : ''}">${escapeHtml(u.fullName.charAt(0).toUpperCase())}</div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-bold text-white truncate">${escapeHtml(u.fullName)}</p>
+              <p class="text-[10px] text-slate-400 truncate">@${escapeHtml(u.login)} · ${escapeHtml(u.role)}</p>
+              <div class="mt-0.5">${userOrgBadges(u) || '<span class="text-[9px] text-slate-500">Tashkilotsiz</span>'}</div>
+            </div>
+            <span class="text-[9px] px-1.5 py-0.5 rounded ${orgCount > 1 ? 'bg-fuchsia-500/20 text-fuchsia-300' : 'bg-slate-700 text-slate-400'} flex-shrink-0">${orgCount} ta</span>
+          </div>`;
+        div.onclick = () => selectMultiOrgUser(id);
+        list.appendChild(div);
+      });
+    };
+
+    window.selectMultiOrgUser = function(uid) {
+      multiOrgSelectedUserId = uid;
+      renderMultiOrgUserList();
+      renderMultiOrgAssignPanel();
+    };
+
+    window.renderMultiOrgAssignPanel = function() {
+      const panel = document.getElementById('multiOrgAssignPanel');
+      const u = globalUsers[multiOrgSelectedUserId];
+      if (!u) {
+        panel.innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-hand-pointer text-slate-600 text-3xl mb-2"></i><p class="text-xs text-slate-400">Chapdan xodimni tanlang</p></div>`;
+        return;
+      }
+      const currentOrgIds = getUserOrgIds(u);
+
+      panel.innerHTML = `
+        <div class="mb-3 pb-3 border-b border-white/10">
+          <div class="flex items-center gap-2">
+            <img src="${u.avatar || ''}" class="w-10 h-10 rounded-full object-cover ${u.avatar ? '' : 'hidden'}">
+            <div class="w-10 h-10 rounded-full bg-fuchsia-600/40 flex items-center justify-center text-sm font-bold ${u.avatar ? 'hidden' : ''}">${escapeHtml(u.fullName.charAt(0).toUpperCase())}</div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-white truncate">${escapeHtml(u.fullName)}</p>
+              <p class="text-[10px] text-indigo-300 truncate">@${escapeHtml(u.login)} · ${escapeHtml(u.role)} (${u.roleType})</p>
+            </div>
+          </div>
+        </div>
+        <p class="text-[10px] font-bold text-slate-400 uppercase mb-2">
+          <i class="fa-solid fa-building mr-1 text-cyan-400"></i>
+          Tashkilotlarni belgilang (1 tadan 3 tagacha):
+        </p>
+        <div class="space-y-1 mb-3">
+          ${Object.keys(globalOrgs).map(oid => {
+            const org = globalOrgs[oid];
+            const checked = currentOrgIds.includes(oid) ? 'checked' : '';
+            const isPrimary = u.orgId === oid;
+            return `
+              <label class="morg-org-row flex items-center gap-2 p-2 rounded-lg bg-slate-800/40 border border-white/5 cursor-pointer">
+                <input type="checkbox" class="multi-org-checkbox w-4 h-4" value="${oid}" ${checked} onchange="onMultiOrgCheckboxChange(this)">
+                <span class="text-xs text-slate-200 flex-1 truncate">${escapeHtml(org.shortName || org.name)}</span>
+                ${isPrimary ? '<span class="text-[9px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded flex-shrink-0">Asosiy</span>' : ''}
+              </label>`;
+          }).join('')}
+        </div>
+        <p class="text-[10px] mb-2" id="multiOrgError"></p>
+        <div class="flex justify-end gap-2">
+          <button onclick="resetMultiOrgSelection()" class="bg-slate-800 px-3 py-2 rounded-xl text-xs">Tiklash</button>
+          <button onclick="saveMultiOrgAssignment()" class="bg-fuchsia-600 hover:bg-fuchsia-500 px-4 py-2 rounded-xl text-xs font-bold text-white">
+            <i class="fa-solid fa-save mr-1"></i> Saqlash
+          </button>
+        </div>
+        <p class="text-[9px] text-slate-500 mt-3 leading-relaxed">
+          <i class="fa-solid fa-circle-info mr-1"></i>
+          Xodim belgilangan barcha tashkilotlarining vazifalarini ko'radi. "Asosiy" — yangi vazifa uchun standart.
+        </p>`;
+    };
+
+    window.onMultiOrgCheckboxChange = function() {
+      const checked = document.querySelectorAll('.multi-org-checkbox:checked');
+      const err = document.getElementById('multiOrgError');
+      if (checked.length > 3) {
+        if (err) { err.textContent = "⚠️ Maksimal 3 ta tashkilot!"; err.className = "text-[10px] text-rose-400 mb-2"; }
+      } else if (checked.length === 0) {
+        if (err) { err.textContent = "⚠️ Kamida 1 ta tashkilot!"; err.className = "text-[10px] text-rose-400 mb-2"; }
+      } else if (err) err.textContent = "";
+    };
+
+    window.resetMultiOrgSelection = function() {
+      const u = globalUsers[multiOrgSelectedUserId]; if (!u) return;
+      const currentOrgIds = getUserOrgIds(u);
+      document.querySelectorAll('.multi-org-checkbox').forEach(cb => {
+        cb.checked = currentOrgIds.includes(cb.value);
+      });
+      const err = document.getElementById('multiOrgError'); if (err) err.textContent = '';
+    };
+
+    window.saveMultiOrgAssignment = function() {
+      if (!multiOrgSelectedUserId) return;
+      const checked = Array.from(document.querySelectorAll('.multi-org-checkbox:checked')).map(cb => cb.value);
+      const err = document.getElementById('multiOrgError');
+      if (checked.length === 0) { if (err) { err.textContent = "⚠️ Kamida 1 ta!"; err.className = "text-[10px] text-rose-400 mb-2"; } return; }
+      if (checked.length > 3) { if (err) { err.textContent = "⚠️ Maksimal 3 ta!"; err.className = "text-[10px] text-rose-400 mb-2"; } return; }
+
+      const u = globalUsers[multiOrgSelectedUserId];
+      const primary = checked.includes(u.orgId) ? u.orgId : checked[0];
+
+      update(ref(db, `admin_users/${multiOrgSelectedUserId}`), {
+        orgId: primary,
+        orgIds: checked,
+        updatedAt: Date.now()
+      }).then(() => {
+        if (err) { err.textContent = "✅ Saqlandi!"; err.className = "text-[10px] text-emerald-400 mb-2"; }
+        setTimeout(() => {
+          renderMultiOrgUserList();
+          renderMultiOrgAssignPanel();
+        }, 300);
+      }).catch(e => {
+        if (err) { err.textContent = "❌ " + e.message; err.className = "text-[10px] text-rose-400 mb-2"; }
+      });
+    };
+
+    document.getElementById('multiOrgSearch')?.addEventListener('input', debounce(() => renderMultiOrgUserList(), 120));
+
+    // --- FORGOT ---
+    window.openForgotPasswordModal = function() {
+      const orgSel = document.getElementById('loginForgotOrgSelect');
+      orgSel.innerHTML = '<option value="all">Barcha Call Center raqamlari</option>';
+      Object.keys(globalOrgs).forEach(id => {
+        const opt = document.createElement('option'); opt.value = id;
+        opt.textContent = globalOrgs[id].shortName || globalOrgs[id].name;
+        orgSel.appendChild(opt);
+      });
+      renderForgotNumbers(); toggleModal('forgotPasswordModal', true);
+    };
+
+    window.renderForgotNumbers = function() {
+      const filterOrg = document.getElementById('loginForgotOrgSelect').value;
+      const list = document.getElementById('forgotNumbersList'); list.innerHTML = '';
+      const orgsToShow = filterOrg === 'all' ? Object.keys(globalOrgs) : [filterOrg];
+      let hasAny = false;
+      orgsToShow.forEach(orgId => {
+        const org = globalOrgs[orgId]; if (!org) return;
+        const phones = (Array.isArray(org.phones) ? org.phones : []).filter(p => p && p.number && p.number.trim());
+        if (phones.length === 0) return;
+        hasAny = true;
+        const header = document.createElement('div');
+        header.className = 'mt-3 first:mt-0';
+        header.innerHTML = `<p class="text-[11px] font-bold text-amber-400 mb-1"><i class="fa-solid fa-building mr-1"></i> ${escapeHtml(org.name)}</p>`;
+        list.appendChild(header);
+        phones.forEach(phone => {
+          const item = document.createElement('div');
+          item.className = 'call-btn glass-card p-3 rounded-xl flex items-center justify-between gap-2 cursor-pointer border border-emerald-500/20 hover:border-emerald-500/60';
+          item.innerHTML = `
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div class="w-10 h-10 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center flex-shrink-0"><i class="fa-solid fa-phone text-emerald-400"></i></div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-bold text-white truncate">${escapeHtml(phone.name || 'Call Center')}</p>
+                <p class="text-[11px] text-emerald-300 font-mono truncate">${escapeHtml(phone.number)}</p>
+              </div>
+            </div>
+            <i class="fa-solid fa-phone-volume text-emerald-400 text-lg"></i>`;
+          item.onclick = () => { window.location.href = 'tel:' + phone.number.replace(/\s/g, ''); };
+          list.appendChild(item);
+        });
+      });
+      if (!hasAny) list.innerHTML = `<div class="text-center py-8"><i class="fa-solid fa-phone-slash text-slate-600 text-3xl mb-2"></i><p class="text-xs text-slate-400">Call Center raqamlari kiritilmagan.</p></div>`;
+    };
+
+    // --- PROFILE ---
+    window.openProfileModal = function() {
+      if (!currentUser) return;
+      document.getElementById('profFullName').value = currentUser.fullName;
+      const orgs = getUserOrgIds(currentUser);
+      document.getElementById('profOrgName').value = orgs.length === 0 ? 'Kiritilmagan'
+        : orgs.map(id => globalOrgs[id]?.name || '?').join(' + ');
+      document.getElementById('profPassword').value = currentUser.password || '••••••••';
+      document.getElementById('profPassword').type = 'password';
+      const img = document.getElementById('profAvatarImg'), ph = document.getElementById('profAvatarPlaceholder');
+      if (currentUser.avatar) { img.src = currentUser.avatar; img.classList.remove('hidden'); ph.classList.add('hidden'); }
+      else { img.classList.add('hidden'); ph.classList.remove('hidden'); ph.textContent = currentUser.fullName.charAt(0).toUpperCase(); }
+      toggleModal('profileModal', true);
+    };
+
+    window.handleAvatarUpload = function(input) {
+      const file = input.files[0]; if (!file) return;
+      if (currentUser.id === 'admin_root') {
+        const r = new FileReader();
+        r.onload = e => {
+          currentUser.avatar = e.target.result;
+          document.getElementById('profAvatarImg').src = e.target.result;
+          document.getElementById('profAvatarImg').classList.remove('hidden');
+          document.getElementById('profAvatarPlaceholder').classList.add('hidden');
+          document.getElementById('headerAvatar').src = e.target.result;
+          document.getElementById('headerAvatar').classList.remove('hidden');
+          document.getElementById('headerAvatarIcon').classList.add('hidden');
+        };
+        r.readAsDataURL(file); return;
+      }
+      const reader = new FileReader();
+      reader.onload = e => {
+        const b64 = e.target.result;
+        if (b64.length > 500000) return alert("Rasm juda katta!");
+        update(ref(db, `admin_users/${currentUser.id}`), { avatar: b64, avatarApproved: false }).then(() => {
+          currentUser.avatar = b64;
+          document.getElementById('profAvatarImg').src = b64;
+          document.getElementById('profAvatarImg').classList.remove('hidden');
+          document.getElementById('profAvatarPlaceholder').classList.add('hidden');
+          document.getElementById('avatarStatusText').textContent = "Admin tasdiqlashi kutilmoqda...";
+          document.getElementById('avatarStatusText').classList.remove('hidden');
+        });
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.togglePasswordView = function() {
+      const input = document.getElementById('profPassword'), icon = document.getElementById('eyeIcon');
+      const sec = document.getElementById('changePasswordSection');
+      if (input.type === 'password') { input.type = 'text'; icon.className = 'fa-solid fa-eye-slash'; sec.classList.remove('hidden'); }
+      else { input.type = 'password'; icon.className = 'fa-solid fa-eye'; sec.classList.add('hidden'); }
+    };
+
+    window.saveNewPassword = function() {
+      const np = document.getElementById('newPasswordInput').value.trim();
+      if (!np) return alert("Yangi parolni kiriting!");
+      if (currentUser.id === 'admin_root') return alert("Bosh admin paroli kodda saqlanadi.");
+      update(ref(db, `admin_users/${currentUser.id}`), { password: np }).then(() => {
+        currentUser.password = np;
+        document.getElementById('profPassword').value = np;
+        document.getElementById('newPasswordInput').value = '';
+        alert("Parol o'zgartirildi!");
+      });
+    };
+
+    // --- ORGS ---
+    onValue(orgsRef, (snap) => {
+      globalOrgs = snap.val() || {};
+      renderOrgsList(); updateDropdowns(); populateAdminOrgFilter();
+      if (transferSelectedUserId) populateTransferOrgSelect();
+      if (document.getElementById('forgotPasswordModal').classList.contains('flex')) renderForgotNumbers();
+      if (document.getElementById('multiOrgModal').classList.contains('flex')) renderMultiOrgAssignPanel();
+    });
+
+    window.addOrgPhoneInput = function(number = '', short = '', name = '') {
+      if (!isRootAdmin()) return;
+      const container = document.getElementById('orgPhonesContainer');
+      const div = document.createElement('div');
+      div.className = 'phone-input-row flex items-center gap-1';
+      div.innerHTML = `
+        <input type="text" placeholder="+998 90 123 45 67" value="${escapeHtml(number)}" class="phone-number glass-input rounded-lg px-2 py-1.5 text-[11px] flex-1">
+        <input type="text" placeholder="Qisqa" value="${escapeHtml(short)}" class="phone-short glass-input rounded-lg px-2 py-1.5 text-[11px] w-20">
+        <input type="text" placeholder="Nom" value="${escapeHtml(name)}" class="phone-name glass-input rounded-lg px-2 py-1.5 text-[11px] w-24">
+        <button type="button" class="text-rose-400 hover:text-rose-300 px-1" onclick="this.parentElement.remove()"><i class="fa-solid fa-xmark"></i></button>`;
+      container.appendChild(div);
+    };
+
+    function getOrgPhonesFromForm() {
+      const rows = document.querySelectorAll('#orgPhonesContainer .phone-input-row');
+      const phones = [];
+      rows.forEach(r => {
+        const number = r.querySelector('.phone-number').value.trim();
+        const short = r.querySelector('.phone-short').value.trim();
+        const name = r.querySelector('.phone-name').value.trim();
+        if (number) phones.push({ number, short, name });
+      });
+      return phones;
+    }
+
+    document.getElementById('orgForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!isRootAdmin()) return alert("❌ Faqat bosh administrator!");
+      const id = document.getElementById('orgId').value;
+      const data = {
+        name: document.getElementById('orgName').value.trim(),
+        shortName: document.getElementById('orgShortName').value.trim(),
+        address: document.getElementById('orgAddress').value.trim(),
+        phones: getOrgPhonesFromForm()
+      };
+      if (id) update(ref(db, `admin_orgs/${id}`), data);
+      else push(orgsRef, data);
+      e.target.reset();
+      document.getElementById('orgId').value = '';
+      document.getElementById('orgPhonesContainer').innerHTML = '';
+      addOrgPhoneInput();
+    });
+
+    function renderOrgsList() {
+      const list = document.getElementById('orgsList'); if (!list) return;
+      list.innerHTML = '';
+      Object.keys(globalOrgs).forEach(id => {
+        const org = globalOrgs[id];
+        const phonesCount = Array.isArray(org.phones) ? org.phones.filter(p => p.number).length : 0;
+        const div = document.createElement('div');
+        div.className = 'glass-card p-3 rounded-xl flex justify-between items-center text-xs';
+        div.innerHTML = `
+          <div class="flex-1 min-w-0">
+            <p class="font-bold text-white truncate">${escapeHtml(org.name)} (${escapeHtml(org.shortName)})</p>
+            <p class="text-[10px] text-slate-400 truncate">${escapeHtml(org.address || '')}</p>
+            ${phonesCount > 0 ? `<p class="text-[10px] text-emerald-400 mt-0.5"><i class="fa-solid fa-phone mr-1"></i>${phonesCount} ta call center</p>` : ''}
+          </div>
+          <div class="flex gap-1 flex-shrink-0">
+            <button class="edit-org text-blue-400 p-1"><i class="fa-solid fa-pen"></i></button>
+            <button class="del-org text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
+          </div>`;
+        div.querySelector('.edit-org').onclick = () => {
+          if (!isRootAdmin()) return;
+          document.getElementById('orgId').value = id;
+          document.getElementById('orgName').value = org.name;
+          document.getElementById('orgShortName').value = org.shortName;
+          document.getElementById('orgAddress').value = org.address || '';
+          const pc = document.getElementById('orgPhonesContainer');
+          pc.innerHTML = '';
+          const phones = Array.isArray(org.phones) ? org.phones : [];
+          if (phones.length === 0) addOrgPhoneInput();
+          else phones.forEach(p => addOrgPhoneInput(p.number || '', p.short || '', p.name || ''));
+        };
+        div.querySelector('.del-org').onclick = () => {
+          if (!isRootAdmin()) return;
+          if (confirm("O'chirilsinmi?")) remove(ref(db, `admin_orgs/${id}`));
+        };
+        list.appendChild(div);
+      });
+    }
+
+    // --- USERS ---
+    onValue(usersRef, (snap) => {
+      globalUsers = snap.val() || {};
+      renderUsersList(); renderMultiAssigneeContainer();
+      if (document.getElementById('multiOrgModal').classList.contains('flex')) renderMultiOrgUserList();
+      if (transferSelectedUserId) { renderTransferSelectedInfo(); updateTransferConfirmButtonState(); }
+
+      if (!currentUser) {
+        const saved = localStorage.getItem('jamoaviy_session');
+        if (saved) {
+          try {
+            const s = JSON.parse(saved);
+            if (s.id === ROOT_ADMIN.id) { currentUser = { ...ROOT_ADMIN }; initUserSession(); }
+            else if (globalUsers[s.id]) { currentUser = { id: s.id, ...globalUsers[s.id] }; initUserSession(); }
+            else localStorage.removeItem('jamoaviy_session');
+          } catch { localStorage.removeItem('jamoaviy_session'); }
+        }
+      } else if (currentUser.id !== ROOT_ADMIN.id && globalUsers[currentUser.id]) {
+        currentUser = { ...currentUser, ...globalUsers[currentUser.id] };
+        if (document.title !== 'LitteR — ' + currentUser.fullName) document.title = 'LitteR — ' + currentUser.fullName;
+        // ⭐ PATCH 5: User ma'lumotlari yangilanganda filtr qayta qurish
+        populateAdminOrgFilter();
+      }
+      renderKanbanBoard();
+    });
+
+    document.getElementById('userForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('userId').value;
+      const login = document.getElementById('userLogin').value.trim();
+
+      const isDup = Object.keys(globalUsers).some(uId => {
+        if (id && uId === id) return false;
+        return globalUsers[uId].login.toLowerCase() === login.toLowerCase();
+      });
+      if (isDup || login.toLowerCase() === ROOT_ADMIN.login) return alert(`❌ "${login}" logini band!`);
+
+      let targetOrgId, orgIds;
+      if (id && globalUsers[id]) {
+        if (isRootAdmin()) targetOrgId = document.getElementById('userOrgSelect').value || globalUsers[id].orgId;
+        else targetOrgId = globalUsers[id].orgId || currentUser.orgId;
+        orgIds = globalUsers[id].orgIds || [globalUsers[id].orgId].filter(Boolean);
+        if (isRootAdmin() && targetOrgId && !orgIds.includes(targetOrgId)) orgIds.push(targetOrgId);
+      } else {
+        targetOrgId = isRootAdmin() ? document.getElementById('userOrgSelect').value : currentUser.orgId;
+        if (!targetOrgId) return alert("Tashkilotni tanlang!");
+        orgIds = [targetOrgId];
+      }
+
+      const data = {
+        roleType: document.getElementById('userRoleType').value,
+        fullName: document.getElementById('userFullName').value.trim(),
+        role: document.getElementById('userRole').value.trim(),
+        login, password: document.getElementById('userPassword').value.trim(),
+        orgId: targetOrgId, orgIds,
+        permissions: {
+          taskAdd: document.getElementById('permTaskAdd').checked,
+          taskEdit: document.getElementById('permTaskEdit').checked,
+          statusChange: document.getElementById('permStatusChange').checked,
+          comment: document.getElementById('permComment').checked
+        }
+      };
+
+      if (id) update(ref(db, `admin_users/${id}`), data);
+      else push(usersRef, data);
+      e.target.reset(); document.getElementById('userId').value = '';
+    });
+
+    function renderUsersList() {
+      const list = document.getElementById('usersListContainer'); if (!list) return;
+      list.innerHTML = '';
+
+      const orgSel = document.getElementById('userOrgSelect');
+      if (orgSel) {
+        if (isRootAdmin()) orgSel.classList.remove('hidden');
+        else { orgSel.classList.add('hidden'); orgSel.value = currentUser.orgId || ''; }
+      }
+
+      Object.keys(globalUsers).forEach(id => {
+        const u = globalUsers[id];
+        if (!isRootAdmin() && !userBelongsToOrg(u, currentUser.orgId)) return;
+
+        const div = document.createElement('div');
+        div.className = 'glass-card p-3 rounded-xl flex justify-between items-center text-xs';
+        div.innerHTML = `
+          <div class="flex items-center gap-2 min-w-0">
+            <img src="${u.avatar || ''}" class="w-8 h-8 rounded-full object-cover flex-shrink-0 ${u.avatar ? '' : 'hidden'}">
+            <div class="min-w-0">
+              <p class="font-bold text-white truncate">${escapeHtml(u.fullName)} <span class="text-[9px] bg-slate-700 px-1 rounded">${u.roleType}</span></p>
+              <p class="text-[10px] text-slate-400 truncate">${escapeHtml(u.role)}</p>
+              <div class="mt-0.5">${userOrgBadges(u) || '<span class="text-[9px] text-slate-500">Tashkilotsiz</span>'}</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 flex-shrink-0">
+            ${u.avatarApproved === false ? `<button class="approve-av text-emerald-400 p-1" title="Rasmni tasdiqlash"><i class="fa-solid fa-check"></i></button>` : ''}
+            ${isRootAdmin() ? `<button class="transfer-u text-cyan-400 p-1" title="O'tkazish"><i class="fa-solid fa-right-left"></i></button>` : ''}
+            <button class="edit-u text-blue-400 p-1"><i class="fa-solid fa-pen"></i></button>
+            <button class="del-u text-rose-400 p-1"><i class="fa-solid fa-trash"></i></button>
+          </div>`;
+        div.querySelector('.edit-u').onclick = () => {
+          document.getElementById('userId').value = id;
+          document.getElementById('userRoleType').value = u.roleType;
+          document.getElementById('userFullName').value = u.fullName;
+          document.getElementById('userRole').value = u.role;
+          document.getElementById('userLogin').value = u.login;
+          document.getElementById('userPassword').value = u.password;
+          document.getElementById('userOrgSelect').value = u.orgId || '';
+          document.getElementById('permTaskAdd').checked = !!u.permissions?.taskAdd;
+          document.getElementById('permTaskEdit').checked = !!u.permissions?.taskEdit;
+          document.getElementById('permStatusChange').checked = !!u.permissions?.statusChange;
+          document.getElementById('permComment').checked = !!u.permissions?.comment;
+        };
+        div.querySelector('.del-u').onclick = () => { if (confirm("O'chirilsinmi?")) remove(ref(db, `admin_users/${id}`)); };
+        const tb = div.querySelector('.transfer-u');
+        if (tb) tb.onclick = () => { toggleModal('userManagementModal', false); openTransferModal(id); };
+        const ab = div.querySelector('.approve-av');
+        if (ab) ab.onclick = () => update(ref(db, `admin_users/${id}`), { avatarApproved: true });
+        list.appendChild(div);
+      });
+    }
+
+    // --- COLUMNS / STATUSES ---
+    onValue(columnsRef, (snap) => {
+      globalColumns = snap.val() || {};
+      if (Object.keys(globalColumns).length === 0) {
+        push(columnsRef, { title: 'Yangi', color: 'blue', order: 1 });
+        push(columnsRef, { title: 'Jarayonda', color: 'yellow', order: 2 });
+        push(columnsRef, { title: 'Bajarildi', color: 'green', order: 3 });
+        return;
+      }
+      renderColumnsList(); updateDropdowns(); renderKanbanBoard();
+    });
+
+    onValue(statusesRef, (snap) => {
+      globalStatuses = snap.val() || {};
+      renderStatusesList(); updateDropdowns();
+    });
+
+    function buildPalette(cid, iid) {
+      const c = document.getElementById(cid), input = document.getElementById(iid);
+      if (!c || !input) return;
+      c.innerHTML = '';
+      PALETTE_COLORS.forEach(col => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = `color-palette-btn ${input.value === col.name ? 'active' : ''}`;
+        b.style.backgroundColor = col.hex;
+        b.onclick = () => {
+          input.value = col.name;
+          c.querySelectorAll('.color-palette-btn').forEach(x => x.classList.remove('active'));
+          b.classList.add('active');
+        };
+        c.appendChild(b);
+      });
+    }
+
+    document.getElementById('columnForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('colId').value;
+      const data = { title: document.getElementById('colTitle').value.trim(), color: document.getElementById('colColor').value };
+      if (id) update(ref(db, `admin_columns/${id}`), data);
+      else push(columnsRef, { ...data, order: Object.keys(globalColumns).length + 1 });
+      e.target.reset(); document.getElementById('colId').value = '';
+      document.getElementById('colColor').value = 'blue';
+      buildPalette('colColorPalette', 'colColor');
+    });
+
+    function renderColumnsList() {
+      const list = document.getElementById('columnsListContainer'); list.innerHTML = '';
+      const sorted = Object.entries(globalColumns).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+      sorted.forEach(([id, col]) => {
+        const div = document.createElement('div');
+        div.className = 'glass-card p-2 rounded-xl flex items-center justify-between text-xs';
+        div.innerHTML = `
+          <span class="font-bold text-slate-200 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full" style="background:${PALETTE_COLORS.find(c => c.name === col.color)?.hex || '#ccc'}"></span>
+            ${escapeHtml(col.title)}
+          </span>
+          <div class="flex gap-1">
+            <button class="edit-col text-blue-400"><i class="fa-solid fa-pen"></i></button>
+            <button class="del-col text-rose-400"><i class="fa-solid fa-trash"></i></button>
+          </div>`;
+        div.querySelector('.edit-col').onclick = () => {
+          document.getElementById('colId').value = id;
+          document.getElementById('colTitle').value = col.title;
+          document.getElementById('colColor').value = col.color;
+          buildPalette('colColorPalette', 'colColor');
+        };
+        div.querySelector('.del-col').onclick = () => { if (confirm("O'chirilsinmi?")) remove(ref(db, `admin_columns/${id}`)); };
+        list.appendChild(div);
+      });
+    }
+
+    document.getElementById('statusForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const id = document.getElementById('statusId').value;
+      const data = {
+        title: document.getElementById('statusTitle').value.trim(),
+        targetType: document.getElementById('statusTargetType').value,
+        color: document.getElementById('statusColor').value
+      };
+      if (id) update(ref(db, `admin_statuses/${id}`), data);
+      else push(statusesRef, data);
+      e.target.reset(); document.getElementById('statusId').value = '';
+      document.getElementById('statusColor').value = 'amber';
+      buildPalette('statusColorPalette', 'statusColor');
+    });
+
+    function renderStatusesList() {
+      const list = document.getElementById('statusesListContainer'); list.innerHTML = '';
+      Object.keys(globalStatuses).forEach(id => {
+        const st = globalStatuses[id];
+        const targetLabel = st.targetType === 'user' ? "👤 O'quvchi" : '👑 Admin';
+        const div = document.createElement('div');
+        div.className = 'glass-card p-2 rounded-xl flex items-center justify-between text-xs';
+        div.innerHTML = `
+          <span class="font-bold text-slate-200 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full" style="background:${PALETTE_COLORS.find(c => c.name === st.color)?.hex || '#ccc'}"></span>
+            ${escapeHtml(st.title)} <span class="text-[9px] bg-slate-800 px-1.5 py-0.5 rounded text-indigo-300 ml-1">${targetLabel}</span>
+          </span>
+          <div class="flex gap-1">
+            <button class="edit-st text-blue-400"><i class="fa-solid fa-pen"></i></button>
+            <button class="del-st text-rose-400"><i class="fa-solid fa-trash"></i></button>
+          </div>`;
+        div.querySelector('.edit-st').onclick = () => {
+          document.getElementById('statusId').value = id;
+          document.getElementById('statusTitle').value = st.title;
+          document.getElementById('statusTargetType').value = st.targetType || 'admin';
+          document.getElementById('statusColor').value = st.color;
+          buildPalette('statusColorPalette', 'statusColor');
+        };
+        div.querySelector('.del-st').onclick = () => { if (confirm("O'chirilsinmi?")) remove(ref(db, `admin_statuses/${id}`)); };
+        list.appendChild(div);
+      });
+    }
+
+    // ⭐ PATCH 6: updateDropdowns — multi-org userlarga barcha o'z tashkilotlarini ko'rsatish
+    function updateDropdowns() {
+      [document.getElementById('userOrgSelect'), document.getElementById('taskOrgId')].forEach(sel => {
+        if (!sel) return;
+        const val = sel.value;
+        sel.innerHTML = '<option value="">Tashkilot tanlang</option>';
+        const allowed = !currentUser ? [] : (isRootAdmin() ? Object.keys(globalOrgs) : getUserOrgIds(currentUser));
+        Object.keys(globalOrgs).forEach(id => {
+          if (!allowed.includes(id)) return;
+          const opt = document.createElement('option');
+          opt.value = id; opt.textContent = globalOrgs[id].name;
+          if (id === val) opt.selected = true;
+          sel.appendChild(opt);
+        });
+        if (!isRootAdmin() && currentUser?.orgId && !sel.value && allowed.includes(currentUser.orgId)) {
+          sel.value = currentUser.orgId;
+        }
+      });
+
+      const gCol = document.getElementById('taskGlobalColId');
+      if (gCol) {
+        gCol.innerHTML = '';
+        Object.keys(globalColumns).forEach(id => {
+          const opt = document.createElement('option');
+          opt.value = id; opt.textContent = globalColumns[id].title;
+          gCol.appendChild(opt);
+        });
+      }
+
+      const gStat = document.getElementById('taskGlobalStatusId');
+      if (gStat) {
+        gStat.innerHTML = '<option value="">Holat tanlanmagan</option>';
+        Object.keys(globalStatuses).forEach(id => {
+          const st = globalStatuses[id];
+          if (st.targetType === 'admin' || !st.targetType) {
+            const opt = document.createElement('option');
+            opt.value = id; opt.textContent = st.title;
+            gStat.appendChild(opt);
+          }
+        });
+      }
+    }
+
+    // ═══ TRANSFER ═══
+    window.openTransferModal = function(userId = null) {
+      if (!isRootAdmin()) return alert("❌ Faqat bosh administrator!");
+      transferSelectedUserId = userId;
+      document.getElementById('transferSearchInput').value = '';
+      document.getElementById('transferSearchResults').classList.add('hidden');
+      document.getElementById('transferSearchResults').innerHTML = '';
+      document.getElementById('transferSelectedInfo').classList.add('hidden');
+      document.getElementById('transferOrgSection').classList.add('hidden');
+      if (userId && globalUsers[userId]) selectTransferUser(userId);
+      toggleModal('transferUserModal', true);
+    };
+
+    window.closeTransferModal = function() {
+      transferSelectedUserId = null;
+      toggleModal('transferUserModal', false);
+    };
+
+    document.getElementById('transferSearchInput').addEventListener('input', debounce((e) => {
+      if (!isRootAdmin()) return;
+      const q = e.target.value.toLowerCase().trim();
+      const results = document.getElementById('transferSearchResults');
+      if (q.length < 1) { results.classList.add('hidden'); results.innerHTML = ''; return; }
+      const matches = Object.entries(globalUsers).filter(([id, u]) =>
+        u.fullName.toLowerCase().includes(q) || u.login.toLowerCase().includes(q)
+      ).slice(0, 20);
+      results.innerHTML = '';
+      if (matches.length === 0) results.innerHTML = '<p class="p-2 text-[11px] text-slate-400 text-center">Topilmadi</p>';
+      else matches.forEach(([id, u]) => {
+        const item = document.createElement('div');
+        item.className = `transfer-user-item flex items-center gap-2 p-2 rounded-lg cursor-pointer border ${transferSelectedUserId === id ? 'selected' : 'border-transparent'}`;
+        item.innerHTML = `
+          <img src="${u.avatar || ''}" class="w-7 h-7 rounded-full object-cover ${u.avatar ? '' : 'hidden'}">
+          <div class="w-7 h-7 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-bold ${u.avatar ? 'hidden' : ''}">${escapeHtml(u.fullName.charAt(0).toUpperCase())}</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-[11px] font-bold text-white truncate">${escapeHtml(u.fullName)}</p>
+            <p class="text-[9px] text-slate-400 truncate">@${escapeHtml(u.login)} · ${userOrgNames(u)}</p>
+          </div>`;
+        item.onclick = () => selectTransferUser(id);
+        results.appendChild(item);
+      });
+      results.classList.remove('hidden');
+    }, 120));
+
+    function selectTransferUser(userId) {
+      if (!isRootAdmin()) return;
+      transferSelectedUserId = userId;
+      document.getElementById('transferSearchResults').classList.add('hidden');
+      document.getElementById('transferSearchInput').value = '';
+      renderTransferSelectedInfo();
+      populateTransferOrgSelect();
+      document.getElementById('transferOrgSection').classList.remove('hidden');
+      updateTransferConfirmButtonState();
+    }
+
+    function renderTransferSelectedInfo() {
+      if (!isRootAdmin()) return;
+      const u = globalUsers[transferSelectedUserId];
+      if (!u) { document.getElementById('transferSelectedInfo').classList.add('hidden'); return; }
+      const ai = document.getElementById('transferAvatarImg'), ph = document.getElementById('transferAvatarPlaceholder');
+      if (u.avatar) { ai.src = u.avatar; ai.classList.remove('hidden'); ph.classList.add('hidden'); }
+      else { ai.classList.add('hidden'); ph.classList.remove('hidden'); ph.textContent = u.fullName.charAt(0).toUpperCase(); }
+      document.getElementById('transferFullName').textContent = u.fullName;
+      document.getElementById('transferRole').textContent = u.role + ' (' + u.roleType + ')';
+      document.getElementById('transferLogin').textContent = u.login;
+      document.getElementById('transferCurrentOrg').textContent = userOrgNames(u);
+      let count = 0;
+      Object.keys(globalTasks).forEach(tId => {
+        const t = globalTasks[tId];
+        if (Array.isArray(t.assignees) && t.assignees.includes(transferSelectedUserId)) count++;
+      });
+      document.getElementById('transferTaskCount').textContent = count;
+      renderTransferHistory(u);
+      document.getElementById('transferSelectedInfo').classList.remove('hidden');
+    }
+
+    function renderTransferHistory(user) {
+      const tl = document.getElementById('transferHistoryTimeline'); tl.innerHTML = '';
+      const events = [];
+      if (user.loginHistory) Object.keys(user.loginHistory).forEach(k => {
+        const h = user.loginHistory[k];
+        events.push({ type: 'login', timestamp: h.timestamp, orgName: h.orgName || (globalOrgs[h.orgId]?.name) || 'Tashkilotsiz' });
+      });
+      if (user.transferHistory) Object.keys(user.transferHistory).forEach(k => {
+        const h = user.transferHistory[k];
+        events.push({ type: 'transfer', timestamp: h.timestamp, fromOrgName: h.fromOrgName || '—', toOrgName: h.toOrgName || '—' });
+      });
+      events.sort((a, b) => b.timestamp - a.timestamp);
+
+      const cur = document.createElement('div');
+      cur.className = 'history-item current';
+      cur.innerHTML = `<span class="text-emerald-300 font-bold"><i class="fa-solid fa-location-dot mr-1"></i> Hozirgi holat</span>
+        <p class="text-slate-300 text-[9px] mt-0.5">Tashkilot(lar): <b class="text-emerald-200">${escapeHtml(userOrgNames(user))}</b></p>`;
+      tl.appendChild(cur);
+
+      if (events.length === 0) {
+        const nh = document.createElement('p'); nh.className = 'text-slate-500 text-[10px] mt-2';
+        nh.textContent = "Boshqa tarix yo'q"; tl.appendChild(nh); return;
+      }
+      events.forEach(ev => {
+        const item = document.createElement('div');
+        if (ev.type === 'login') {
+          item.className = 'history-item';
+          item.innerHTML = `<span class="text-cyan-300 font-bold"><i class="fa-solid fa-right-to-bracket mr-1"></i> Tizimga kirdi</span>
+            <p class="text-slate-500 text-[9px] mt-0.5 font-mono">${formatHistoryDate(ev.timestamp)}</p>
+            <p class="text-slate-400 text-[9px]">Tashkilot: <b class="text-slate-200">${escapeHtml(ev.orgName)}</b></p>`;
+        } else {
+          item.className = 'history-item old';
+          item.innerHTML = `<span class="text-amber-300 font-bold"><i class="fa-solid fa-right-left mr-1"></i> O'tkazildi</span>
+            <p class="text-slate-500 text-[9px] mt-0.5 font-mono">${formatHistoryDate(ev.timestamp)}</p>
+            <p class="text-slate-400 text-[9px]">Eski: <b class="text-amber-200">${escapeHtml(ev.fromOrgName)}</b></p>
+            <p class="text-slate-400 text-[9px]">Yangi: <b class="text-emerald-300">${escapeHtml(ev.toOrgName)}</b></p>`;
+        }
+        tl.appendChild(item);
+      });
+    }
+
+    function populateTransferOrgSelect() {
+      if (!isRootAdmin()) return;
+      const sel = document.getElementById('transferOrgSelect');
+      sel.innerHTML = '<option value="">Tashkilot tanlang</option>';
+      const u = globalUsers[transferSelectedUserId];
+      const currentOrgIds = getUserOrgIds(u);
+      Object.keys(globalOrgs).forEach(id => {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = globalOrgs[id].name + (globalOrgs[id].shortName ? ' (' + globalOrgs[id].shortName + ')' : '') + (currentOrgIds.includes(id) ? ' ✓' : '');
+        sel.appendChild(opt);
+      });
+    }
+
+    document.getElementById('transferOrgSelect').addEventListener('change', updateTransferConfirmButtonState);
+
+    function updateTransferConfirmButtonState() {
+      if (!isRootAdmin()) return;
+      const btn = document.getElementById('transferConfirmBtn');
+      const newOrgId = document.getElementById('transferOrgSelect').value;
+      btn.disabled = !(transferSelectedUserId && newOrgId);
+    }
+
+    window.confirmUserTransfer = function() {
+      if (!isRootAdmin()) return alert("❌ Faqat bosh administrator!");
+      if (!transferSelectedUserId) return;
+      const newOrgId = document.getElementById('transferOrgSelect').value;
+      if (!newOrgId) return alert("Yangi tashkilotni tanlang!");
+      const u = globalUsers[transferSelectedUserId];
+      if (!u) return;
+      const oldOrgId = u.orgId;
+      const oldOrgName = globalOrgs[oldOrgId]?.name || 'Tashkilotsiz';
+      const newOrgName = globalOrgs[newOrgId]?.name || '';
+      if (!confirm(`⚠️ "${u.fullName}" xodimini\n\n📤 Eski: ${oldOrgName}\n📥 Yangi: ${newOrgName}\n\nGa o'tkazilsinmi?`)) return;
+
+      const oldOrgIds = getUserOrgIds(u);
+      const newOrgIds = oldOrgIds.filter(id => id !== oldOrgId);
+      if (!newOrgIds.includes(newOrgId)) newOrgIds.push(newOrgId);
+
+      const transferEntry = {
+        timestamp: Date.now(), fromOrgId: oldOrgId || null, fromOrgName: oldOrgName,
+        toOrgId: newOrgId, toOrgName: newOrgName
+      };
+
+      const updates = [
+        update(ref(db, `admin_users/${transferSelectedUserId}`), {
+          orgId: newOrgId, orgIds: newOrgIds, transferredAt: Date.now(), previousOrgId: oldOrgId || null
+        }),
+        push(ref(db, `admin_users/${transferSelectedUserId}/transferHistory`), transferEntry)
+      ];
+
+      Object.keys(globalTasks).forEach(tId => {
+        const t = globalTasks[tId];
+        if (Array.isArray(t.assignees) && t.assignees.includes(transferSelectedUserId) && t.orgId === oldOrgId) {
+          updates.push(update(ref(db, `admin_tasks/${tId}`), { orgId: newOrgId, updatedAt: Date.now() }));
+        }
+      });
+
+      Promise.all(updates).then(() => {
+        alert(`✅ "${u.fullName}" muvaffaqiyatli "${newOrgName}"ga o'tkazildi!`);
+        closeTransferModal(); renderKanbanBoard();
+      }).catch(e => alert("❌ " + e.message));
+    };
+
+    // ═══ TASKS ═══
+    window.openTaskModal = function(id = null) {
+      if (id) {
+        const task = globalTasks[id]; if (!task) return;
+        const isAdmin = currentUser.roleType === 'admin';
+        const isCreator = task.creatorId === currentUser.id;
+        if (!isAdmin && !isCreator) return alert("Faqat o'zingiz yaratgan vazifani tahrirlashingiz mumkin!");
+        if (!isRootAdmin() && !userBelongsToOrg(currentUser, task.orgId)) return alert("❌ Boshqa tashkilot vazifasi!");
+      }
+
+      document.getElementById('taskForm').reset();
+      document.getElementById('taskId').value = '';
+      document.getElementById('taskColor').value = 'blue';
+      buildPalette('taskColorPalette', 'taskColor');
+      document.getElementById('taskImageStatus').textContent = '';
+      selectedTaskImages = [];
+
+      const orgSelect = document.getElementById('taskOrgId');
+      const useIndCheck = document.getElementById('useIndividualSettings');
+      document.getElementById('multiAssigneeContainer').classList.remove('opacity-50', 'pointer-events-none');
+      orgSelect.disabled = false; useIndCheck.disabled = false;
+
+      if (id) {
+        document.getElementById('taskModalTitle').textContent = 'Vazifani Tahrirlash';
+        const task = globalTasks[id];
+        document.getElementById('taskId').value = id;
+        document.getElementById('taskTitle').value = task.title;
+        document.getElementById('taskDesc').value = task.desc;
+        document.getElementById('taskDueDate').value = task.dueDate || '';
+        document.getElementById('taskColor').value = task.color || 'blue';
+        buildPalette('taskColorPalette', 'taskColor');
+
+        const myOrgs = getUserOrgIds(currentUser);
+        if (isRootAdmin() || myOrgs.length > 1) {
+          orgSelect.classList.remove('hidden');
+          orgSelect.value = task.orgId;
+        } else {
+          orgSelect.classList.add('hidden');
+          orgSelect.value = currentUser.orgId;
+        }
+
+        renderMultiAssigneeContainer(task.orgId || currentUser.orgId);
+
+        setTimeout(() => {
+          document.querySelectorAll('.assignee-checkbox').forEach(cb => {
+            cb.checked = task.assignees.includes(cb.value);
+          });
+          updateIndividualSettingsUI();
+
+          if (task.individualSettings && Object.keys(task.individualSettings).length > 0) {
+            useIndCheck.checked = true; toggleIndividualMode();
+            document.querySelectorAll('#individualSettingsDiv > div').forEach(div => {
+              const uid = div.dataset.uid;
+              if (task.individualSettings[uid]) {
+                const cSel = div.querySelector('.ind-col-select'), sSel = div.querySelector('.ind-status-select');
+                if (cSel && task.individualSettings[uid].colId) cSel.value = task.individualSettings[uid].colId;
+                if (sSel && task.individualSettings[uid].statusId) sSel.value = task.individualSettings[uid].statusId;
+              }
+            });
+          } else {
+            useIndCheck.checked = false; toggleIndividualMode();
+            document.getElementById('taskGlobalColId').value = task.globalColId || task.statusColId;
+            document.getElementById('taskGlobalStatusId').value = task.globalStatusId || '';
+          }
+          if (task.images && task.images.length > 0) {
+            selectedTaskImages = [...task.images];
+            document.getElementById('taskImageStatus').textContent = `${selectedTaskImages.length} ta mavjud rasm`;
+          }
+        }, 100);
+      } else {
+        document.getElementById('taskModalTitle').textContent = 'Yangi Vazifa';
+        const myOrgs = getUserOrgIds(currentUser);
+
+        // ⭐ Multi-org user yoki root: tashkilot tanlash imkoniyati
+        if (isRootAdmin() || myOrgs.length > 1) {
+          orgSelect.classList.remove('hidden');
+          orgSelect.required = true;
+          orgSelect.onchange = () => { renderMultiAssigneeContainer(orgSelect.value); toggleIndividualMode(); };
+
+          if (isRootAdmin()) {
+            if (selectedOrgFilter !== 'all') { orgSelect.value = selectedOrgFilter; renderMultiAssigneeContainer(selectedOrgFilter); }
+            else { orgSelect.value = ''; renderMultiAssigneeContainer(''); }
+          } else {
+            const preset = (selectedOrgFilter !== 'all' && myOrgs.includes(selectedOrgFilter))
+                           ? selectedOrgFilter : myOrgs[0];
+            orgSelect.value = preset;
+            renderMultiAssigneeContainer(preset);
+          }
+        } else {
+          orgSelect.classList.add('hidden');
+          orgSelect.value = currentUser.orgId;
+          renderMultiAssigneeContainer(currentUser.orgId);
+        }
+        useIndCheck.checked = false; toggleIndividualMode();
+      }
+      toggleModal('taskModal', true);
+    };
+
+    document.getElementById('taskImagesInput').addEventListener('change', function(e) {
+      selectedTaskImages = [];
+      const files = e.target.files;
+      if (files.length > 0) {
+        const st = document.getElementById('taskImageStatus');
+        st.textContent = "Yuklanmoqda...";
+        let processed = 0;
+        Array.from(files).forEach(file => {
+          if (file.size > 200000) { alert(`"${file.name}" juda katta (Maks 200kb)`); return; }
+          const r = new FileReader();
+          r.onload = ev => {
+            selectedTaskImages.push(ev.target.result);
+            processed++;
+            if (processed === files.length) st.textContent = `${selectedTaskImages.length} ta rasm yuklandi`;
+          };
+          r.readAsDataURL(file);
+        });
+      }
+    });
+
+    window.toggleIndividualMode = function() {
+      const isChecked = document.getElementById('useIndividualSettings').checked;
+      const g = document.getElementById('globalSettingsDiv'), i = document.getElementById('individualSettingsDiv');
+      if (isChecked) { g.classList.add('hidden'); i.classList.remove('hidden'); }
+      else { g.classList.remove('hidden'); i.classList.add('hidden'); }
+      const myOrgs = getUserOrgIds(currentUser);
+      const orgId = (isRootAdmin() || myOrgs.length > 1) ? document.getElementById('taskOrgId').value : currentUser.orgId;
+      renderMultiAssigneeContainer(orgId);
+    };
+
+    function renderMultiAssigneeContainer(orgId = null) {
+      const container = document.getElementById('multiAssigneeContainer');
+      const indContainer = document.getElementById('individualSettingsDiv');
+      if (!container || !indContainer) return;
+      container.innerHTML = ''; indContainer.innerHTML = '';
+
+      const myOrgs = getUserOrgIds(currentUser);
+      const filterOrg = (isRootAdmin() || myOrgs.length > 1) ? (orgId || '') : currentUser.orgId;
+      const useInd = document.getElementById('useIndividualSettings').checked;
+
+      const adminStatusOptions = Object.keys(globalStatuses).filter(sid => {
+        const st = globalStatuses[sid]; return st.targetType === 'admin' || !st.targetType;
+      }).map(sid => `<option value="${sid}">${escapeHtml(globalStatuses[sid].title)}</option>`).join('');
+
+      Object.keys(globalUsers).forEach(uId => {
+        const u = globalUsers[uId];
+        if (u.roleType === 'admin') return;
+        if (!isRootAdmin() && !userBelongsToOrg(u, currentUser.orgId)) return;
+        if (filterOrg && !userBelongsToOrg(u, filterOrg)) return;
+
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-between gap-2 p-1 hover:bg-white/5 rounded';
+        div.innerHTML = `
+          <label class="flex items-center gap-2 text-xs text-slate-200 cursor-pointer flex-1">
+            <input type="checkbox" value="${uId}" class="assignee-checkbox w-3.5 h-3.5 rounded bg-slate-800" onchange="updateIndividualSettingsUI()">
+            <span>${escapeHtml(u.fullName)}</span>
+            ${getUserOrgIds(u).length > 1 ? '<span class="text-[8px] text-fuchsia-300 bg-fuchsia-500/20 px-1 rounded">ko\'p</span>' : ''}
+          </label>`;
+        container.appendChild(div);
+
+        if (useInd) {
+          const indDiv = document.createElement('div');
+          indDiv.className = 'grid grid-cols-2 gap-2 p-2 bg-slate-800/50 rounded-lg border border-white/5 mb-1 hidden';
+          indDiv.dataset.uid = uId;
+          indDiv.innerHTML = `
+            <div>
+              <label class="text-[9px] text-slate-400 block mb-0.5">Ustun</label>
+              <select class="ind-col-select glass-input rounded px-2 py-1 text-[10px] w-full">
+                ${Object.keys(globalColumns).map(cid => `<option value="${cid}">${escapeHtml(globalColumns[cid].title)}</option>`).join('')}
+              </select>
+            </div>
+            <div>
+              <label class="text-[9px] text-slate-400 block mb-0.5">Admin Holati</label>
+              <select class="ind-status-select glass-input rounded px-2 py-1 text-[10px] w-full">
+                <option value="">Holat...</option>${adminStatusOptions}
+              </select>
+            </div>`;
+          indContainer.appendChild(indDiv);
+        }
+      });
+      updateIndividualSettingsUI();
+    }
+
+    window.updateIndividualSettingsUI = function() {
+      const cbs = document.querySelectorAll('.assignee-checkbox');
+      const divs = document.querySelectorAll('#individualSettingsDiv > div');
+      divs.forEach(div => {
+        const uid = div.dataset.uid;
+        const cb = Array.from(cbs).find(c => c.value === uid);
+        if (cb && cb.checked) div.classList.remove('hidden'); else div.classList.add('hidden');
+      });
+    };
+
+    document.getElementById('taskForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const tId = document.getElementById('taskId').value;
+      const existingTask = tId ? globalTasks[tId] : null;
+
+      if (tId && existingTask) {
+        const isAdmin = currentUser.roleType === 'admin';
+        const isCreator = existingTask.creatorId === currentUser.id;
+        if (!isAdmin && !isCreator) return alert("Sizda tahrirlash huquqi yo'q!");
+        if (!isRootAdmin() && !userBelongsToOrg(currentUser, existingTask.orgId)) return alert("❌ Boshqa tashkilot vazifasi!");
+      }
+
+      const selectedAssignees = Array.from(document.querySelectorAll('.assignee-checkbox:checked')).map(cb => cb.value);
+      if (selectedAssignees.length === 0) return alert("Kamida bitta xodimni tanlang!");
+
+      const useInd = document.getElementById('useIndividualSettings').checked;
+      let individualSettings = existingTask ? { ...existingTask.individualSettings } : {};
+
+      if (useInd) {
+        document.querySelectorAll('#individualSettingsDiv > div').forEach(div => {
+          const uid = div.dataset.uid;
+          if (selectedAssignees.includes(uid)) {
+            const prevUS = individualSettings[uid]?.userStatusId || '';
+            individualSettings[uid] = {
+              colId: div.querySelector('.ind-col-select').value,
+              statusId: div.querySelector('.ind-status-select').value,
+              userStatusId: prevUS
+            };
+          }
+        });
+      } else individualSettings = {};
+
+      // ⭐ Multi-org: targetOrgId to'g'ri tanlash
+      let targetOrgId;
+      if (existingTask) {
+        targetOrgId = existingTask.orgId;
+      } else {
+        const myOrgs = getUserOrgIds(currentUser);
+        if (isRootAdmin() || myOrgs.length > 1) {
+          targetOrgId = document.getElementById('taskOrgId').value;
+        } else {
+          targetOrgId = currentUser.orgId;
+        }
+      }
+      if (!targetOrgId) return alert("Tashkilotni tanlang!");
+
+      const taskData = {
+        title: document.getElementById('taskTitle').value.trim(),
+        desc: document.getElementById('taskDesc').value.trim(),
+        assignees: selectedAssignees,
+        globalColId: useInd ? '' : document.getElementById('taskGlobalColId').value,
+        globalStatusId: useInd ? '' : document.getElementById('taskGlobalStatusId').value,
+        individualSettings,
+        color: document.getElementById('taskColor').value,
+        dueDate: document.getElementById('taskDueDate').value,
+        orgId: targetOrgId,
+        creatorId: existingTask ? existingTask.creatorId : currentUser.id,
+        updatedAt: Date.now(),
+        images: selectedTaskImages.length > 0 ? selectedTaskImages : (existingTask ? existingTask.images : [])
+      };
+
+      if (tId) update(ref(db, `admin_tasks/${tId}`), taskData).then(() => toggleModal('taskModal', false));
+      else { taskData.createdAt = Date.now(); push(tasksRef, taskData).then(() => toggleModal('taskModal', false)); }
+    });
+
+    onValue(tasksRef, (snap) => {
+      globalTasks = snap.val() || {};
+      renderKanbanBoard();
+      if (transferSelectedUserId) renderTransferSelectedInfo();
+    });
+
+    window.updateUserStatusFromCard = function(taskId, newUSId) {
+      update(ref(db, `admin_tasks/${taskId}/individualSettings/${currentUser.id}`), { userStatusId: newUSId });
+    };
+
+    // ⭐ PATCH 3: renderKanbanBoard — barcha userlar uchun selectedOrgFilter
+    function renderKanbanBoard() {
+      if (!currentUser) return;
+      const board = document.getElementById('columnsContainer');
+      board.innerHTML = '';
+      const sorted = Object.entries(globalColumns).sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+
+      sorted.forEach(([cId, col]) => {
+        const colEl = document.createElement('div');
+        colEl.className = 'glass-card rounded-2xl p-4 min-w-[300px] w-[320px] flex flex-col min-h-[500px] flex-shrink-0';
+        const hex = PALETTE_COLORS.find(c => c.name === col.color)?.hex || '#3b82f6';
+        colEl.innerHTML = `
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
+            <div class="flex items-center gap-2">
+              <span class="w-3 h-3 rounded-full" style="background:${hex}"></span>
+              <h2 class="font-semibold text-slate-200 text-xs uppercase">${escapeHtml(col.title)}</h2>
+            </div>
+            <span class="task-count px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-300">0</span>
+          </div>
+          <div class="task-cards-list flex-1 space-y-3 overflow-y-auto pr-1"></div>`;
+        const cardsList = colEl.querySelector('.task-cards-list');
+        let count = 0;
+
+        Object.keys(globalTasks).forEach(tId => {
+          const task = globalTasks[tId];
+          const isAssigned = Array.isArray(task.assignees) && task.assignees.includes(currentUser.id);
+          const isAdmin = currentUser.roleType === 'admin';
+          const isRoot = isRootAdmin();
+
+          // Multi-org scoping
+          if (!isRoot && !userBelongsToOrg(currentUser, task.orgId)) return;
+          // Filtr — barcha userlar uchun (root ham, multi-org ham)
+          if (selectedOrgFilter !== 'all' && task.orgId !== selectedOrgFilter) return;
+          // Oddiy user faqat o'ziga biriktirilganlarini ko'radi
+          if (!isAdmin && !isAssigned) return;
+
+          const targetColId = task.globalColId || task.individualSettings?.[currentUser.id]?.colId || task.statusColId;
+          if (targetColId === cId) {
+            cardsList.appendChild(createTaskCard(tId, task, isAssigned, isAdmin));
+            count++;
+          }
+        });
+        colEl.querySelector('.task-count').textContent = count;
+        board.appendChild(colEl);
+      });
+    }
+
+    function createTaskCard(id, task, isAssignedToMe, isAdmin) {
+      const card = document.createElement('div');
+      const hex = PALETTE_COLORS.find(c => c.name === task.color)?.hex || '#3b82f6';
+      card.style.borderLeftColor = hex;
+      card.className = `glass-card p-3 rounded-xl border-l-4 flex flex-col gap-2 relative group hover:bg-white/5 transition task-card-wrapper`;
+
+      const assigneesNames = Array.isArray(task.assignees) ? task.assignees.map(uid => globalUsers[uid]?.fullName || '?').join(', ') : "Yo'q";
+
+      let adminStId = task.individualSettings?.[currentUser.id]?.statusId || task.globalStatusId;
+      let adminStHtml = '';
+      if (adminStId && globalStatuses[adminStId]) {
+        const st = globalStatuses[adminStId];
+        const c = PALETTE_COLORS.find(x => x.name === st.color)?.hex || '#ccc';
+        adminStHtml = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold border" style="background:${c}20;color:${c};border-color:${c}50">Admin: ${escapeHtml(st.title)}</span>`;
+      }
+
+      let userStId = task.individualSettings?.[currentUser.id]?.userStatusId || '';
+      let userStHtml = '';
+      if (userStId && globalStatuses[userStId]) {
+        const st = globalStatuses[userStId];
+        const c = PALETTE_COLORS.find(x => x.name === st.color)?.hex || '#ccc';
+        userStHtml = `<span class="text-[9px] px-2 py-0.5 rounded-full font-bold border" style="background:${c}20;color:${c};border-color:${c}50">O'quvchi: ${escapeHtml(st.title)}</span>`;
+      }
+
+      let userSel = '';
+      if (isAssignedToMe && !isAdmin) {
+        const opts = Object.keys(globalStatuses).filter(sid => globalStatuses[sid].targetType === 'user')
+          .map(sid => `<option value="${sid}" ${userStId === sid ? 'selected' : ''}>${escapeHtml(globalStatuses[sid].title)}</option>`).join('');
+        userSel = `
+          <div class="mt-2" onclick="event.stopPropagation()">
+            <label class="text-[9px] text-slate-400 block mb-0.5">Bajarilganini belgilash:</label>
+            <select onchange="updateUserStatusFromCard('${id}', this.value)" class="w-full glass-input rounded-lg px-2 py-1 text-[10px]">
+              <option value="">Holatni tanlang...</option>${opts}
+            </select>
+          </div>`;
+      }
+
+      const canEdit = isAdmin || currentUser.id === task.creatorId;
+
+      card.innerHTML = `
+        <div onclick="openTaskDetail('${id}')" class="cursor-pointer">
+          <div class="flex justify-between items-start gap-1">
+            <h4 class="font-bold text-slate-100 text-xs leading-snug">${escapeHtml(task.title)}</h4>
+            <div class="flex flex-col gap-1 items-end">${adminStHtml}${userStHtml}</div>
+          </div>
+          <p class="text-[10px] text-slate-400 line-clamp-1 mt-1">${escapeHtml(task.desc)}</p>
+          <div class="text-[10px] text-slate-400 pt-2 border-t border-white/5 flex justify-between items-center mt-2">
+            <span class="truncate max-w-[150px]"><i class="fa-solid fa-user text-indigo-400"></i> ${escapeHtml(assigneesNames)}</span>
+            <span>${task.dueDate || ''}</span>
+          </div>
+        </div>
+        <div class="flex items-center justify-between mt-1">
+          ${userSel}
+          <div class="ml-auto flex items-center gap-1">
+            ${canEdit ? `<button onclick="event.stopPropagation(); openTaskModal('${id}')" class="text-slate-400 hover:text-blue-400 text-xs p-1" title="Tahrirlash"><i class="fa-solid fa-pen"></i></button>` : ''}
+            <button onclick="event.stopPropagation(); deleteTaskWithPassword('${id}')" class="hidden-delete-btn text-rose-500 hover:text-rose-400 text-[11px] p-1" title="O'chirish (parol kerak)"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>`;
+      return card;
+    }
+
+    window.openTaskDetail = function(taskId) {
+      currentViewingTaskId = taskId;
+      const task = globalTasks[taskId]; if (!task) return;
+      document.getElementById('detailTaskTitle').textContent = task.title;
+      const assigneesNames = Array.isArray(task.assignees) ? task.assignees.map(uid => globalUsers[uid]?.fullName || '?').join(', ') : "Yo'q";
+
+      let adminStId = task.individualSettings?.[currentUser.id]?.statusId || task.globalStatusId;
+      let adminStDisplay = 'Belgilanmagan';
+      if (adminStId && globalStatuses[adminStId]) {
+        const st = globalStatuses[adminStId];
+        const c = PALETTE_COLORS.find(x => x.name === st.color)?.hex || '#ccc';
+        adminStDisplay = `<span class="px-2 py-0.5 rounded text-[10px] font-bold border" style="background:${c}20;color:${c};border-color:${c}50">${escapeHtml(st.title)}</span>`;
+      }
+
+      let allUsersHtml = '';
+      if (currentUser.roleType === 'admin') {
+        allUsersHtml = `<div class="mt-3 p-2 bg-slate-900/60 rounded-xl border border-white/5">
+          <p class="text-[10px] font-bold text-indigo-300 mb-1">Xodimlarning shaxsiy holatlari:</p>
+          <div class="space-y-1">`;
+        if (task.assignees) task.assignees.forEach(uid => {
+          const n = globalUsers[uid]?.fullName || '?';
+          const stId = task.individualSettings?.[uid]?.userStatusId;
+          const stTitle = stId && globalStatuses[stId] ? globalStatuses[stId].title : 'Belgilanmagan';
+          allUsersHtml += `<div class="text-[10px] flex justify-between text-slate-300"><span>${escapeHtml(n)}:</span> <span class="text-amber-400 font-semibold">${escapeHtml(stTitle)}</span></div>`;
+        });
+        allUsersHtml += `</div></div>`;
+      }
+
+      let imagesHTML = '';
+      if (task.images && task.images.length > 0) {
+        imagesHTML = `<div class="mt-4"><p class="text-[10px] font-bold text-slate-400 mb-2">Vazifa rasmlari:</p><div class="grid grid-cols-3 gap-2">`;
+        task.images.forEach(img => { imagesHTML += `<img src="${img}" class="w-full h-24 object-cover rounded-lg border border-white/10 cursor-pointer hover:opacity-80 transition" onclick="window.open('${img}', '_blank')">`; });
+        imagesHTML += `</div></div>`;
+      }
+
+      document.getElementById('detailTaskContent').innerHTML = `
+        <p class="text-xs text-slate-300 mb-2">${escapeHtml(task.desc || "Tavsif yo'q")}</p>
+        <div class="flex gap-4 text-[10px] text-slate-400 mb-2">
+          <span><i class="fa-solid fa-users"></i> ${escapeHtml(assigneesNames)}</span>
+          <span><i class="fa-regular fa-calendar"></i> ${task.dueDate || 'Muddatsiz'}</span>
+        </div>
+        <div class="flex items-center gap-2 mt-2 text-xs">
+          <span class="text-[10px] text-slate-400">Admin holati:</span> ${adminStDisplay}
+        </div>
+        ${allUsersHtml}${imagesHTML}`;
+
+      renderComments(task.comments || {});
+      const ca = document.getElementById('commentInputArea');
+      if (currentUser.roleType === 'admin' || currentUser.permissions?.comment || currentUser.roleType === 'teacher') ca.classList.remove('hidden');
+      else ca.classList.add('hidden');
+      toggleModal('taskDetailModal', true);
+    };
+
+    function renderComments(comments, containerId = 'commentsList', parentId = null) {
+      const container = document.getElementById(containerId);
+      if (!parentId) container.innerHTML = '';
+      Object.keys(comments).forEach(cId => {
+        const c = comments[cId];
+        const div = document.createElement('div');
+        div.className = parentId ? 'comment-reply' : 'bg-slate-900/50 p-3 rounded-xl border border-white/5';
+        const author = globalUsers[c.userId] || { fullName: c.authorName || (c.userId === 'admin_root' ? 'Bosh Admin' : '?'), avatar: null };
+        div.innerHTML = `
+          <div class="flex items-start gap-2">
+            <img src="${author.avatar || ''}" class="w-6 h-6 rounded-full object-cover mt-1 ${author.avatar ? '' : 'hidden'}">
+            <div class="flex-1">
+              <div class="flex justify-between items-center">
+                <span class="text-[10px] font-bold text-indigo-300">${escapeHtml(author.fullName)}</span>
+                <span class="text-[9px] text-slate-500">${new Date(c.timestamp).toLocaleString()}</span>
+              </div>
+              <p class="text-xs text-slate-200 mt-1">${escapeHtml(c.text)}</p>
+              ${c.image ? `<img src="${c.image}" class="mt-2 max-h-32 rounded-lg border border-white/10">` : ''}
+              <div class="flex gap-2 mt-2">
+                <button class="text-[9px] text-blue-400 hover:underline reply-btn">Javob berish</button>
+                ${(currentUser.id === c.userId || currentUser.roleType === 'admin') ? `<button class="text-[9px] text-rose-400 hover:underline del-c-btn">O'chirish</button>` : ''}
+              </div>
+              <div class="reply-form hidden mt-2">
+                <input type="text" class="reply-input w-full glass-input rounded px-2 py-1 text-[10px]" placeholder="Javob...">
+                <button class="send-reply mt-1 bg-slate-700 px-2 py-0.5 rounded text-[9px]">Yuborish</button>
+              </div>
+            </div>
+          </div>`;
+        const rb = div.querySelector('.reply-btn'), rf = div.querySelector('.reply-form');
+        const ri = div.querySelector('.reply-input'), sr = div.querySelector('.send-reply');
+        rb.onclick = () => rf.classList.toggle('hidden');
+        sr.onclick = () => {
+          const text = ri.value.trim(); if (!text) return;
+          push(ref(db, `admin_tasks/${currentViewingTaskId}/comments/${cId}/replies`), { userId: currentUser.id, text, timestamp: Date.now() }).then(() => openTaskDetail(currentViewingTaskId));
+        };
+        const dbDel = div.querySelector('.del-c-btn');
+        if (dbDel) dbDel.onclick = () => { if (confirm("Izoh o'chirilsinmi?")) remove(ref(db, `admin_tasks/${currentViewingTaskId}/comments/${cId}`)).then(() => openTaskDetail(currentViewingTaskId)); };
+        container.appendChild(div);
+        if (c.replies) renderComments(c.replies, div.querySelector('.flex-1'), cId);
+      });
+    }
+
+    window.previewCommentImage = function(input) {
+      const f = input.files[0]; if (!f) return;
+      const r = new FileReader();
+      r.onload = e => { selectedCommentImage = e.target.result; document.getElementById('commentImagePreview').classList.remove('hidden'); };
+      r.readAsDataURL(f);
+    };
+
+    window.submitComment = function() {
+      const text = document.getElementById('newCommentText').value.trim();
+      if (!text && !selectedCommentImage) return;
+      const cd = { userId: currentUser.id, text, timestamp: Date.now() };
+      if (currentUser.id === 'admin_root') cd.authorName = currentUser.fullName;
+      if (selectedCommentImage) cd.image = selectedCommentImage;
+      push(ref(db, `admin_tasks/${currentViewingTaskId}/comments`), cd).then(() => {
+        document.getElementById('newCommentText').value = '';
+        document.getElementById('commentImagePreview').classList.add('hidden');
+        selectedCommentImage = null;
+        openTaskDetail(currentViewingTaskId);
+      });
+    };
+
+    // --- SEARCH ---
+    document.getElementById('globalUserSearch').addEventListener('input', debounce((e) => {
+      const q = e.target.value.toLowerCase().trim();
+      const results = document.getElementById('searchResultsDropdown');
+      if (q.length < 2) { results.classList.add('hidden'); return; }
+      const matches = Object.entries(globalUsers).filter(([id, u]) => {
+        if (!isRootAdmin() && !userBelongsToOrg(u, currentUser.orgId)) return false;
+        return u.fullName.toLowerCase().includes(q) || u.role.toLowerCase().includes(q);
+      });
+      results.innerHTML = '';
+      if (matches.length === 0) results.innerHTML = '<p class="p-3 text-xs text-slate-400">Topilmadi</p>';
+      else matches.forEach(([id, u]) => {
+        const div = document.createElement('div');
+        div.className = 'p-3 border-b border-white/5 flex items-center gap-2 hover:bg-white/5 cursor-pointer';
+        div.innerHTML = `
+          <img src="${u.avatar || ''}" class="w-8 h-8 rounded-full object-cover ${u.avatar ? '' : 'hidden'}">
+          <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold ${u.avatar ? 'hidden' : ''}">${escapeHtml(u.fullName.charAt(0).toUpperCase())}</div>
+          <div>
+            <p class="text-xs font-bold text-white">${escapeHtml(u.fullName)}</p>
+            <p class="text-[10px] text-indigo-300">${escapeHtml(u.role)} | ${userOrgNames(u)}</p>
+          </div>`;
+        div.onclick = () => {
+          results.classList.add('hidden');
+          document.getElementById('globalUserSearch').value = '';
+          alert(`Xodim: ${u.fullName}\nLavozim: ${u.role}\nTashkilot(lar): ${userOrgNames(u)}\nLogin: ${u.login}`);
+        };
+        results.appendChild(div);
+      });
+      results.classList.remove('hidden');
+    }, 150));
+
+    buildPalette('colColorPalette', 'colColor');
+    buildPalette('statusColorPalette', 'statusColor');
+    buildPalette('taskColorPalette', 'taskColor');
+    addOrgPhoneInput();
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
