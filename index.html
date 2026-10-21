@@ -279,7 +279,7 @@
       <div class="bg-fuchsia-500/10 border border-fuchsia-500/20 rounded-xl p-3 mb-4">
         <p class="text-[11px] text-fuchsia-200">
           <i class="fa-solid fa-circle-info mr-1"></i>
-          Bu bo'lim orqali bitta xodimni <b>bir vaqtda 2-3 ta tashkilotga</b> biriktirishingiz mumkin. Xodim barcha tashkilotlarining vazifalarini ko'radi.
+          Bu bo'lim orqali bitta xodimni <b>bir vaqtda 2-3 ta tashkilotga</b> biriktirishingiz mumkin.
         </p>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1 overflow-hidden">
@@ -526,7 +526,7 @@
     function getUserOrgIds(u) {
       if (!u) return [];
       const set = new Set();
-      if (u.orgId) set.add(u.orgId);
+      if (u.orgId && u.orgId !== 'all') set.add(u.orgId);
       if (Array.isArray(u.orgIds)) u.orgIds.forEach(id => { if (id) set.add(id); });
       return Array.from(set);
     }
@@ -660,12 +660,11 @@
         }
       }
 
-      // ⭐ PATCH 4: Init filterni chaqirish
       populateAdminOrgFilter();
       renderKanbanBoard();
     }
 
-    // ⭐ PATCH 1: Multi-org userlarga ham filtr
+    // ⭐ FILTR: Faqat biriktirilgan tashkilotlar (multi-org uchun "all" yo'q)
     function populateAdminOrgFilter() {
       const sel = document.getElementById('adminOrgFilter');
       const wrap = document.getElementById('adminOrgFilterWrapper');
@@ -682,37 +681,47 @@
       }
 
       wrap.classList.add('show');
-      const prev = selectedOrgFilter || 'all';
       sel.innerHTML = '';
 
       if (isRoot) {
+        // Root admin: barcha tashkilotlar
+        const prev = selectedOrgFilter || 'all';
         sel.innerHTML = '<option value="all">Barcha tashkilotlar</option>';
         Object.keys(globalOrgs).forEach(id => {
-          const o = globalOrgs[id];
-          const opt = document.createElement('option');
-          opt.value = id; opt.textContent = o.shortName || o.name;
-          sel.appendChild(opt);
-        });
-      } else {
-        sel.innerHTML = '<option value="all">Mening tashkilotlarim</option>';
-        myOrgs.forEach(id => {
           const o = globalOrgs[id]; if (!o) return;
           const opt = document.createElement('option');
           opt.value = id; opt.textContent = o.shortName || o.name;
           sel.appendChild(opt);
         });
-        if (prev !== 'all' && !myOrgs.includes(prev)) {
-          selectedOrgFilter = 'all'; sel.value = 'all'; return;
+        if (prev !== 'all' && !globalOrgs[prev]) { selectedOrgFilter = 'all'; sel.value = 'all'; }
+        else { sel.value = prev; }
+      } else {
+        // ⭐ Multi-org user: FAQAT biriktirilgan tashkilotlar, boshqasi YO'Q
+        myOrgs.forEach(id => {
+          const o = globalOrgs[id]; if (!o) return;
+          const opt = document.createElement('option');
+          opt.value = id;
+          opt.textContent = (o.shortName || o.name) + (id === currentUser.orgId ? ' ★' : '');
+          sel.appendChild(opt);
+        });
+
+        // Standart: asosiy org (orgId) yoki birinchi biriktirilgan
+        if (!selectedOrgFilter || selectedOrgFilter === 'all' || !myOrgs.includes(selectedOrgFilter)) {
+          selectedOrgFilter = (currentUser.orgId && myOrgs.includes(currentUser.orgId))
+            ? currentUser.orgId
+            : myOrgs[0];
         }
+        sel.value = selectedOrgFilter;
       }
-      sel.value = prev;
     }
 
-    // ⭐ PATCH 2: Change listener — multi-org userlar ham
+    // ⭐ Change: multi-org user 'all' tanlay olmaydi (option yo'q)
     document.addEventListener('change', (e) => {
       if (e.target && e.target.id === 'adminOrgFilter') {
         if (!currentUser) return;
         const v = e.target.value;
+        if (!v) return;
+        if (!isRootAdmin() && v === 'all') return;
         if (v !== 'all') {
           const allowed = isRootAdmin() ? Object.keys(globalOrgs) : getUserOrgIds(currentUser);
           if (!allowed.includes(v)) return;
@@ -825,7 +834,7 @@
         </div>
         <p class="text-[9px] text-slate-500 mt-3 leading-relaxed">
           <i class="fa-solid fa-circle-info mr-1"></i>
-          Xodim belgilangan barcha tashkilotlarining vazifalarini ko'radi. "Asosiy" — yangi vazifa uchun standart.
+          Xodim faqat belgilangan tashkilotlarining vazifalarini ko'radi. "Asosiy" — yangi vazifa uchun standart.
         </p>`;
     };
 
@@ -1095,7 +1104,6 @@
       } else if (currentUser.id !== ROOT_ADMIN.id && globalUsers[currentUser.id]) {
         currentUser = { ...currentUser, ...globalUsers[currentUser.id] };
         if (document.title !== 'LitteR — ' + currentUser.fullName) document.title = 'LitteR — ' + currentUser.fullName;
-        // ⭐ PATCH 5: User ma'lumotlari yangilanganda filtr qayta qurish
         populateAdminOrgFilter();
       }
       renderKanbanBoard();
@@ -1311,7 +1319,6 @@
       });
     }
 
-    // ⭐ PATCH 6: updateDropdowns — multi-org userlarga barcha o'z tashkilotlarini ko'rsatish
     function updateDropdowns() {
       [document.getElementById('userOrgSelect'), document.getElementById('taskOrgId')].forEach(sel => {
         if (!sel) return;
@@ -1608,7 +1615,6 @@
         document.getElementById('taskModalTitle').textContent = 'Yangi Vazifa';
         const myOrgs = getUserOrgIds(currentUser);
 
-        // ⭐ Multi-org user yoki root: tashkilot tanlash imkoniyati
         if (isRootAdmin() || myOrgs.length > 1) {
           orgSelect.classList.remove('hidden');
           orgSelect.required = true;
@@ -1758,7 +1764,6 @@
         });
       } else individualSettings = {};
 
-      // ⭐ Multi-org: targetOrgId to'g'ri tanlash
       let targetOrgId;
       if (existingTask) {
         targetOrgId = existingTask.orgId;
@@ -1801,7 +1806,7 @@
       update(ref(db, `admin_tasks/${taskId}/individualSettings/${currentUser.id}`), { userStatusId: newUSId });
     };
 
-    // ⭐ PATCH 3: renderKanbanBoard — barcha userlar uchun selectedOrgFilter
+    // ⭐ KANBAN: multi-org user faqat tanlangan org'ni ko'radi
     function renderKanbanBoard() {
       if (!currentUser) return;
       const board = document.getElementById('columnsContainer');
@@ -1830,9 +1835,9 @@
           const isAdmin = currentUser.roleType === 'admin';
           const isRoot = isRootAdmin();
 
-          // Multi-org scoping
+          // Multi-org: faqat o'z tashkilotlaridagi vazifalar
           if (!isRoot && !userBelongsToOrg(currentUser, task.orgId)) return;
-          // Filtr — barcha userlar uchun (root ham, multi-org ham)
+          // Filtr: selectedOrgFilter bo'yicha (root: 'all' mumkin; multi-org: har doim bitta org)
           if (selectedOrgFilter !== 'all' && task.orgId !== selectedOrgFilter) return;
           // Oddiy user faqat o'ziga biriktirilganlarini ko'radi
           if (!isAdmin && !isAssigned) return;
